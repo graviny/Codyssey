@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>등각 타로 한 판</title>
+  <style>
+    :root {
+      --bg-deep: #0b0818;
+      --bg-mid: #161030;
+      --velvet-dark: #1d1238;
+      --velvet-mid: #2c1a54;
+      --velvet-light: #3d2473;
+      --gold: #e8c468;
+      --gold-bright: #ffe699;
+      --gold-dim: #9e7f34;
+      --text-main: #f5eedc;
+      --text-sub: #c5b8e0;
+      --card-bg: #17112b;
+      --card-front: #fbf6ea;
+      --card-ink: #22173b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: radial-gradient(circle at 50% 25%, #231746 0%, var(--bg-mid) 45%, var(--bg-deep) 100%);
+      color: var(--text-main);
+      font-family: 'Pretendard', 'Noto Serif KR', 'Malgun Gothic', serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* 상단 헤더 및 컨트롤 */
+    header {
+      width: 100%;
+      max-width: 920px;
+      padding: 20px 16px 8px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .title-group h1 {
+      font-size: clamp(1.35rem, 3.5vw, 1.9rem);
+      color: var(--gold-bright);
+      letter-spacing: 0.06em;
+      text-shadow: 0 0 14px rgba(232, 196, 104, 0.45);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-group p {
+      font-size: clamp(0.8rem, 2.2vw, 0.92rem);
+      color: var(--text-sub);
+      margin-top: 3px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      background: linear-gradient(145deg, #2b1d4c, #1a1130);
+      color: var(--gold-bright);
+      border: 1.5px solid var(--gold);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45), inset 0 0 8px rgba(232, 196, 104, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(232, 196, 104, 0.35), inset 0 0 12px rgba(232, 196, 104, 0.25);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.sound-active {
+      background: linear-gradient(145deg, #4b3280, #2c1a54);
+      box-shadow: 0 0 16px rgba(232, 196, 104, 0.5);
+    }
+
+    /* 메인 영역 */
+    main {
+      width: 100%;
+      max-width: 920px;
+      padding: 4px 12px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* 등각(30도) 테이블 무대 */
+    .stage-wrapper {
+      width: 100%;
+      perspective: 1100px;
+      display: flex;
+      justify-content: center;
+      padding: 16px 4px 26px;
+    }
+
+    .iso-table {
+      position: relative;
+      width: 100%;
+      max-width: 780px;
+      min-height: 360px;
+      background:
+        radial-gradient(ellipse at 50% 45%, var(--velvet-light) 0%, var(--velvet-mid) 52%, var(--velvet-dark) 100%);
+      border-radius: 28px;
+      border: 2px solid var(--gold);
+      transform: rotateX(30deg);
+      transform-style: preserve-3d;
+      box-shadow:
+        0 26px 0 -4px #140b29,
+        0 28px 0 -2px var(--gold-dim),
+        0 42px 55px rgba(0, 0, 0, 0.85),
+        inset 0 0 50px rgba(10, 5, 24, 0.8),
+        inset 0 0 2px rgba(255, 230, 153, 0.6);
+      padding: 36px 24px 40px;
+      display: flex;
+      flex-direction: column;
+       justify-content: center;
+      align-items: center;
+    }
+
+    /* 벨벳 테이블 안쪽 금선 장식 */
+    .iso-table::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 1px dashed rgba(232, 196, 104, 0.45);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
+    /* 테이블 가장자리 소품 (촛불, 수정구, 룬 문양) */
+    .prop {
+      position: absolute;
+      pointer-events: none;
+      transform: translateZ(18px) rotateX(-22deg);
+      transform-origin: bottom center;
+    }
+
+    .prop-candle-left {
+      top: 14px;
+      left: 20px;
+      width: 54px;
+      height: 76px;
+      filter: drop-shadow(0 0 12px rgba(255, 190, 70, 0.65));
+    }
+
+    .prop-crystal-right {
+      top: 14px;
+      right: 22px;
+      width: 64px;
+      height: 72px;
+      filter: drop-shadow(0 0 16px rgba(156, 220, 255, 0.65));
+    }
+
+    .flame-anim {
+      transform-origin: 50% 85%;
+      animation: flicker 2.2s infinite ease-in-out alternate;
+    }
+
+    @keyframes flicker {
+      0% { transform: scale(1) rotate(-2deg); opacity: 0.92; }
+      50% { transform: scale(1.06, 0.96) rotate(2deg); opacity: 1; }
+      100% { transform: scale(0.95, 1.05) rotate(-1deg); opacity: 0.88; }
+    }
+
+    .crystal-glow {
+      animation: pulseCrystal 3.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseCrystal {
+      0%, 100% { opacity: 0.65; }
+      50% { opacity: 1; }
+    }
+
+    /* 빛나는 룬 문양 */
+    .rune {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px rgba(255, 225, 130, 0.85));
+      animation: runeGlow 3s infinite ease-in-out alternate;
+    }
+
+    .rune-1 { bottom: 16px; left: 26px; animation-delay: 0s; }
+    .rune-2 { bottom: 16px; right: 26px; animation-delay: 1s; }
+    .rune-3 { top: 20px; left: 50%; transform: translateX(-50%); animation-delay: 0.5s; }
+    .rune-4 { bottom: 14px; left: 50%; transform: translateX(-50%); animation-delay: 1.5s; }
+
+    @keyframes runeGlow {
+      0% { opacity: 0.45; filter: drop-shadow(0 0 4px rgba(232, 196, 104, 0.4)); }
+      100% { opacity: 1; filter: drop-shadow(0 0 12px rgba(255, 235, 165, 0.95)); }
+    }
+
+    /* 카드 3장 가로 배치 */
+    .cards-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(10px, 3.5vw, 34px);
+      width: 100%;
+      max-width: 600px;
+      z-index: 5;
+      transform-style: preserve-3d;
+      margin-top: 12px;
+    }
+
+    .card-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transform-style: preserve-3d;
+    }
+
+    .slot-label {
+      background: rgba(15, 9, 30, 0.82);
+      border: 1px solid var(--gold);
+      color: var(--gold-bright);
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: clamp(0.75rem, 2.2vw, 0.9rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+      transform: translateZ(8px);
+    }
+
+    /* 3D 카드 컨테이너 */
+    .card-container {
+      width: 100%;
+      max-width: 168px;
+      aspect-ratio: 2 / 3.15;
+      perspective: 900px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), filter 0.3s ease;
+    }
+
+    /* 마우스 올렸을 때 떠오르고 금빛 번짐 */
+    @media (hover: hover) {
+      .card-container:hover:not(.flipped) {
+        transform: translateY(-16px) translateZ(22px) scale(1.03);
+        filter: drop-shadow(0 14px 22px rgba(255, 215, 110, 0.65));
+      }
+      .card-container.flipped:hover {
+        transform: translateY(-8px) translateZ(14px);
+        filter: drop-shadow(0 10px 18px rgba(255, 215, 110, 0.45));
+      }
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.72s cubic-bezier(0.34, 1.45, 0.64, 1);
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.65);
+    }
+
+    .card-container.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* 카드 뒷면 (금색 테두리와 신비로운 기하학 무늬) */
+    .card-back {
+      background: linear-gradient(135deg, #1b1136 0%, #0f0822 100%);
+      border: 2.5px solid var(--gold);
+      padding: 6px;
+      box-shadow: inset 0 0 12px rgba(232, 196, 104, 0.35);
+    }
+
+    .card-back svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 카드 앞면 */
+    .card-front {
+      background: radial-gradient(circle at 50% 35%, #fffdf7 0%, #f3e8ce 100%);
+      color: var(--card-ink);
+      border: 2.5px solid var(--gold);
+      transform: rotateY(180deg);
+      padding: 8px 6px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      box-shadow: inset 0 0 0 2px #d8b55b;
+    }
+
+    .card-num {
+      font-size: clamp(0.65rem, 1.8vw, 0.78rem);
+      font-weight: 700;
+      color: #6b4e19;
+      letter-spacing: 0.08em;
+    }
+
+    .card-art {
+      width: 86%;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      margin: 2px 0;
+    }
+
+    .card-art svg {
+      width: 100%;
+      height: 100%;
+      max-height: 135px;
+    }
+
+    .card-title-kr {
+      font-size: clamp(0.75rem, 2vw, 0.92rem);
+      font-weight: 800;
+      color: var(--card-ink);
+      line-height: 1.15;
+    }
+
+    .card-title-en {
+      font-size: clamp(0.56rem, 1.5vw, 0.68rem);
+      color: #65537a;
+      margin-top: 1px;
+      letter-spacing: 0.02em;
+    }
+
+    /* 안내 문구 */
+    .guide-banner {
+      font-size: 0.9rem;
+      color: var(--gold-bright);
+      text-align: center;
+      background: rgba(29, 18, 56, 0.75);
+      border: 1px solid rgba(232, 196, 104, 0.4);
+      padding: 7px 18px;
+      border-radius: 999px;
+    }
+
+    /* 하단 설명 상자 (해석 영역) */
+    .reading-box {
+      width: 100%;
+      background: linear-gradient(180deg, rgba(28, 18, 54, 0.92) 0%, rgba(16, 10, 34, 0.96) 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: 18px;
+      padding: 20px 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), inset 0 0 24px rgba(232, 196, 104, 0.08);
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .reading-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(232, 196, 104, 0.3);
+      padding-bottom: 10px;
+    }
+
+    .reading-header h2 {
+      font-size: 1.05rem;
+      color: var(--gold-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .reading-status {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+    }
+
+    .reading-empty {
+      text-align: center;
+      color: var(--text-sub);
+      padding: 26px 10px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .reading-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .reading-item {
+      background: rgba(15, 9, 30, 0.65);
+      border: 1px solid rgba(232, 196, 104, 0.35);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      opacity: 0.45;
+      transition: opacity 0.35s ease, border-color 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .reading-item.revealed {
+      opacity: 1;
+      border-color: var(--gold);
+      background: rgba(38, 23, 72, 0.65);
+    }
+
+    .reading-item.active-focus {
+      box-shadow: 0 0 16px rgba(232, 196, 104, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .reading-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pos-badge {
+      background: var(--gold);
+      color: #1a1030;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 9px;
+      border-radius: 999px;
+    }
+
+    .reading-card-name {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: var(--gold-bright);
+    }
+
+    .reading-desc {
+      font-size: 0.88rem;
+      line-height: 1.58;
+      color: var(--text-main);
+      word-break: keep-all;
+    }
+
+    footer {
+      font-size: 0.76rem;
+      color: rgba(197, 184, 224, 0.6);
+      text-align: center;
+      padding: 8px 16px 24px;
+    }
+
+    /* 모바일 화면 대응 (가로 스크롤 없이 한눈에 표시) */
+    @media (max-width: 640px) {
+      header {
+        padding: 14px 12px 4px;
+      }
+      .stage-wrapper {
+        padding: 8px 0 18px;
+      }
+      .iso-table {
+        min-height: 250px;
+        padding: 28px 10px 28px;
+        border-radius: 20px;
+      }
+      .prop-candle-left {
+        width: 36px;
+        height: 52px;
+        top: 6px;
+        left: 8px;
+      }
+      .prop-crystal-right {
+        width: 42px;
+        height: 48px;
+        top: 6px;
+        right: 8px;
+      }
+      .rune {
+        width: 20px;
+        height: 20px;
+      }
+      .cards-row {
+        gap: 8px;
+      }
+      .reading-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-group">
+      <h1>✦ 등각 타로 한 판</h1>
+      <p>과거 · 현재 · 미래의 카드 3장을 뒤집어 오늘의 흐름을 가볍게 읽어보세요.</p>
+    </div>
+    <div class="controls">
+      <button id="soundBtn" class="btn" type="button" aria-pressed="false">
+        <span id="soundIcon">🔇</span>
+        <span id="soundLabel">소리 켜기</span>
+      </button>
+      <button id="resetBtn" class="btn" type="button">
+        <span>↻</span>
+        <span>다시 뽑기</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="stage-wrapper">
+      <div class="iso-table" aria-label="등각 타로 테이블">
+        <!-- 왼쪽 가장자리 촛불 (SVG) -->
+        <div class="prop prop-candle-left" aria-hidden="true">
+          <svg viewBox="0 0 60 85" fill="none">
+            <ellipse cx="30" cy="76" rx="22" ry="6" fill="#b8903c" stroke="#ffe699" stroke-width="1.5"/>
+            <rect x="20" y="34" width="20" height="40" rx="3" fill="#f7eed7" stroke="#d5c295" stroke-width="1.5"/>
+            <path d="M20 42 Q25 50 28 43 T36 46 T40 40" stroke="#fff9ea" stroke-width="2" fill="none"/>
+            <line x1="30" y1="28" x2="30" y2="34" stroke="#2c1d11" stroke-width="2"/>
+            <g class="flame-anim">
+              <circle cx="30" cy="20" r="14" fill="rgba(255, 195, 70, 0.25)"/>
+              <path d="M30 5 C22 16, 22 26, 30 30 C38 26, 38 16, 30 5 Z" fill="#ff9d2e"/>
+              <path d="M30 11 C25 18, 25 25, 30 28 C35 25, 35 18, 30 11 Z" fill="#fff2a6"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 오른쪽 가장자리 수정구 (SVG) -->
+        <div class="prop prop-crystal-right" aria-hidden="true">
+          <svg viewBox="0 0 70 80" fill="none">
+            <path d="M18 68 L52 68 L45 54 L25 54 Z" fill="#b8903c" stroke="#ffe699" stroke-width="1.5"/>
+            <ellipse cx="35" cy="68" rx="19" ry="4.5" fill="#8f6b24" stroke="#ffe699" stroke-width="1.2"/>
+            <circle cx="35" cy="34" r="24" fill="url(#crystalGrad)" stroke="#bfe8ff" stroke-width="1.5"/>
+            <ellipse class="crystal-glow" cx="27" cy="24" rx="7" ry="4" transform="rotate(-25 27 24)" fill="rgba(255,255,255,0.65)"/>
+            <path class="crystal-glow" d="M24 38 Q35 28 46 36 Q36 46 24 38 Z" fill="rgba(195, 145, 255, 0.4)"/>
+            <defs>
+              <radialGradient id="crystalGrad" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#e3f6ff" stop-opacity="0.9"/>
+                <stop offset="55%" stop-color="#7c5ce6" stop-opacity="0.75"/>
+                <stop offset="100%" stop-color="#23134a" stop-opacity="0.95"/>
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- 빛나는 룬 문양 4개 -->
+        <svg class="rune rune-1" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M16 3 L16 29 M16 6 L25 13 L16 20 M16 12 L7 19" stroke="#ffe699" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        </svg>
+        <svg class="rune rune-2" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M9 4 L23 16 L9 28 M23 4 L9 16 L23 28" stroke="#ffe699" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        </svg>
+        <svg class="rune rune-3" viewBox="0 0 32 32" aria-hidden="true">
+          <polygon points="16,3 27,16 16,29 5,16" stroke="#ffe699" stroke-width="2" fill="none"/>
+          <circle cx="16" cy="16" r="4" fill="#ffe699"/>
+        </svg>
+        <svg class="rune rune-4" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M8 6 L24 26 M24 6 L8 26 M16 3 L16 29" stroke="#ffe699" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+
+        <!-- 카드 3장 배치 영역 -->
+        <div class="cards-row" id="cardsRow">
+          <!-- JS로 과거·현재·미래 카드 3장 렌더링 -->
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-banner" id="guideBanner">
+      카드를 차례대로 눌러 과거 · 현재 · 미래의 운세를 확인해 보세요.
+    </div>
+
+    <!-- 화면 아래 설명 상자 -->
+    <section class="reading-box" aria-live="polite">
+      <div class="reading-header">
+        <h2>✧ 오늘의 타로 해석</h2>
+        <span class="reading-status" id="readingStatus">뒤집힌 카드: 0 / 3</span>
+      </div>
+      <div id="readingContent">
+        <div class="reading-empty">
+          아직 뒤집힌 카드가 없습니다.<br/>
+          테이블 위의 <strong>과거 · 현재 · 미래</strong> 카드를 눌러 뒤집어 보세요.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    본 페이지는 메이저 아르카나 22장을 사용한 가벼운 재미용 타로 웹페이지이며, 뽑은 결과는 저장되지 않습니다.
+  </footer>
+
+  <script>
+    // 메이저 아르카나 22장 데이터 (한글·영문 이름, 로마 숫자, 아이콘 타입, 과거/현재/미래 해석)
+    const MAJOR_ARCANA = [
+      {
+        id: 0, roman: "0", kr: "바보", en: "The Fool", art: "fool",
+        past: "익숙한 틀에서 벗어나 순수한 호기심으로 새로운 걸음을 내디뎠던 시기입니다.",
+        present: "계획에 너무 얽매이지 말고 가벼운 마음으로 새로운 시도를 해보면 좋은 날입니다.",
+        future: "예상치 못한 뜻밖의 기회나 설레는 출발이 곧 찾아올 것입니다."
+      },
+      {
+        id: 1, roman: "I", kr: "마법사", en: "The Magician", art: "magician",
+        past: "자신이 가진 재능과 도구를 활용해 문제를 영리하게 해결해 왔습니다.",
+        present: "아이디어와 실행력이 모두 갖춰져 있으니 자신 있게 주도권을 잡아보세요.",
+        future: "준비해 온 능력을 발휘해 원하는 결과를 직접 만들어내게 됩니다."
+      },
+      {
+        id: 2, roman: "II", kr: "여사제", en: "The High Priestess", art: "priestess",
+        past: "감정에 휩쓸리기보다 조용히 상황을 관찰하며 내면의 지혜를 쌓아왔습니다.",
+        present: "성급히 행동하기보다 직관을 믿고 한 걸음 물러서서 살펴보는 것이 유리합니다.",
+        future: "감춰져 있던 해답이 드러나고 마음속 확신을 얻게 될 것입니다."
+      },
+      {
+        id: 3, roman: "III", kr: "여황제", en: "The Empress", art: "empress",
+        past: "주변의 따뜻한 배려와 풍요로운 환경 속에서 안정감을 키워왔습니다.",
+        present: "마음의 여유를 즐기고 나 자신과 주변 사람들을 다정하게 챙기기에 좋은 날입니다.",
+        future: "정성 들여 가꿔온 일에서 풍성하고 만족스러운 결실을 맺게 됩니다."
+      },
+      {
+        id: 4, roman: "IV", kr: "황제", en: "The Emperor", art: "emperor",
+        past: "확고한 원칙과 책임감으로 흔들림 없이 기반을 다져왔습니다.",
+        present: "규칙적인 생활과 체계적인 계획이 오늘의 목표를 이루는 든든한 힘이 됩니다.",
+        future: "안정적인 위치에 오르거나 주변의 신뢰를 받으며 중심을 잡게 됩니다."
+      },
+      {
+        id: 5, roman: "V", kr: "교황", en: "The Hierophant", art: "hierophant",
+        past: "검증된 방식이나 믿을 만한 조언자의 가르침을 따르며 성장해 왔습니다.",
+        present: "혼자 고민하기보다 경험 많은 사람이나 선배의 조언을 구하면 실마리가 풀립니다.",
+        future: "좋은 멘토를 만나거나 신뢰할 수 있는 집단에서 도움을 얻게 됩니다."
+      },
+      {
+        id: 6, roman: "VI", kr: "연인", en: "The Lovers", art: "lovers",
+        past: "마음이 통하는 사람들과의 교류나 중요한 선택이 지금의 나를 만들었습니다.",
+        present: "대화와 협력이 잘 풀리는 날이니 소중한 사람과 솔직한 마음을 나눠보세요.",
+        future: "가치관이 잘 맞는 파트너십이나 기분 좋은 인연이 이어질 것입니다."
+      },
+      {
+        id: 7, roman: "VII", kr: "전차", en: "The Chariot", art: "chariot",
+        past: "망설임을 이겨내고 강한 추진력으로 장애물을 돌파해 왔습니다.",
+        present: "목표를 향해 집중력을 발휘하면 빠르게 성과를 낼 수 있는 역동적인 하루입니다.",
+        future: "경쟁이나 어려운 과제를 거뜬히 넘어 원하는 고지에 도달하게 됩니다."
+      },
+      {
+        id: 8, roman: "VIII", kr: "힘", en: "Strength", art: "strength",
+        past: "강압이 아닌 인내심과 부드러운 포용력으로 어려움을 다스려 왔습니다.",
+        present: "조급해하지 않고 차분한 용기로 다가가면 까다로운 일도 자연스레 풀립니다.",
+        future: "내면의 단단한 힘으로 끝까지 흐름을 지켜내며 원하는 바를 이룹니다."
+      },
+      {
+        id: 9, roman: "IX", kr: "은둔자", en: "The Hermit", art: "hermit",
+        past: "혼자만의 시간을 통해 깊이 생각하고 진짜 중요한 가치를 찾아왔습니다.",
+        present: "소란스러운 외부 일정보다 잠시 조용히 생각을 정리하는 시간이 큰 도움이 됩니다.",
+        future: "깊은 성찰 끝에 흔들리지 않는 나만의 해답과 방향을 찾게 됩니다."
+      },
+      {
+        id: 10, roman: "X", kr: "운명의 수레바퀴", en: "Wheel of Fortune", art: "wheel",
+        past: "예상치 못한 변화의 흐름 속에서도 유연하게 적응하며 여기까지 왔습니다.",
+        present: "흐름이 새롭게 바뀌는 전환점이니 자연스럽게 기회를 받아들여 보세요.",
+        future: "막혀 있던 일이 순조롭게 돌아가며 반가운 행운의 타이밍이 찾아옵니다."
+      },
+      {
+        id: 11, roman: "XI", kr: "정의", en: "Justice", art: "justice",
+        past: "치우치지 않는 균형 감각과 공정한 판단으로 선택을 내려왔습니다.",
+        present: "감정보다 객관적인 사실에 바탕을 두고 결정하면 후회 없는 하루가 됩니다.",
+        future: "그동안 기울인 노력만큼 정당하고 합리적인 보상을 받게 될 것입니다."
+      },
+      {
+        id: 12, roman: "XII", kr: "매달린 사람", en: "The Hanged Man", art: "hanged",
+        past: "더 큰 성장을 위해 잠시 멈춰 기다리거나 희생을 감수했던 시간이 있었습니다.",
+        present: "관점을 조금만 뒤집어 보면 답답해 보이던 상황에서 새로운 지혜가 보입니다.",
+        future: "잠시의 기다림이 끝난 뒤 이전과는 전혀 다른 새로운 시야를 얻게 됩니다."
+      },
+      {
+        id: 13, roman: "XIII", kr: "죽음", en: "Death", art: "death",
+        past: "오래된 습관이나 끝난 일을 정리하며 한 단계를 마무리했습니다.",
+        present: "불필요한 미련을 덜어낼수록 새롭고 산뜻한 에너지가 채워지는 날입니다.",
+        future: "과거의 껍질을 벗고 완전히 새롭고 희망찬 국면이 시작될 것입니다."
+      },
+      {
+        id: 14, roman: "XIV", kr: "절제", en: "Temperance", art: "temperance",
+        past: "서로 다른 조건들을 조화롭게 조율하며 무리 없이 균형을 맞춰왔습니다.",
+        present: "과유불급을 기억하고 일과 휴식의 황금 비율을 유지하면 편안한 하루가 됩니다.",
+        future: "갈등이나 어수선함이 가라앉고 마음이 평온하게 정돈될 것입니다."
+      },
+      {
+        id: 15, roman: "XV", kr: "악마", en: "The Devil", art: "devil",
+        past: "강한 몰입이나 쉽게 떨치기 힘든 유혹·집착에 에너지를 쏟았던 적이 있습니다.",
+        present: "나도 모르게 매여 있는 습관이나 과한 욕심을 가볍게 점검해 보면 좋습니다.",
+        future: "나를 묶어두던 부담에서 벗어나 스스로 주도권을 되찾게 됩니다."
+      },
+      {
+        id: 16, roman: "XVI", kr: "탑", en: "The Tower", art: "tower",
+        past: "갑작스러운 변화나 고정관념이 깨지는 경험을 통해 오히려 단단해졌습니다.",
+        present: "예상과 다른 변수가 생기더라도 당황하지 말고 틀을 새로 짜는 기회로 삼으세요.",
+        future: "불안정했던 요소가 정리되고 더 튼튼한 토대 위에 새로 서게 됩니다."
+      },
+      {
+        id: 17, roman: "XVII", kr: "별", en: "The Star", art: "star",
+        past: "어려운 순간에도 희망과 긍정적인 기대를 잃지 않고 걸어왔습니다.",
+        present: "영감과 반짝이는 아이디어가 떠오르는 날이니 소망하는 바를 그려보세요.",
+        future: "마음이 치유되고 바랐던 소식에 한 걸음 가까워지는 밝은 미래가 열립니다."
+      },
+      {
+        id: 18, roman: "XVIII", kr: "달", en: "The Moon", art: "moon",
+        past: "확실하지 않은 상황 속에서도 조심스럽게 길을 탐색하며 지나왔습니다.",
+        present: "막연한 걱정이나 추측에 흔들리지 말고 확인된 사실에 집중하는 것이 좋습니다.",
+        future: "안개가 걷히듯 모호했던 일들이 점차 또렷하게 밝혀질 것입니다."
+      },
+      {
+        id: 19, roman: "XIX", kr: "태양", en: "The Sun", art: "sun",
+        past: "밝은 에너지와 성실함으로 주변에 긍정적인 영향을 주며 성장했습니다.",
+        present: "활기가 넘치고 하는 일마다 시원하게 풀리는 기분 좋은 하루입니다.",
+        future: "보람찬 성취와 함께 웃음 지을 일이 가득한 따뜻한 시간이 찾아옵니다."
+      },
+      {
+        id: 20, roman: "XX", kr: "심판", en: "Judgement", art: "judgement",
+        past: "지나온 노력과 선택들이 차곡차곡 쌓여 중요한 전환점을 준비해 왔습니다.",
+        present: "잊고 있던 목표나 반가운 연락이 다시 살아나 새로운 동기를 주는 날입니다.",
+        future: "그동안의 수고가 인정받고 한 단계 도약하는 뜻깊은 결실을 맞이합니다."
+      },
+      {
+        id: 21, roman: "XXI", kr: "세계", en: "The World", art: "world",
+        past: "하나의 긴 여정을 성실하게 완주하며 값진 경험과 완성을 이뤄냈습니다.",
+        present: "진행 중인 일이 조화롭게 마무리되며 큰 만족감을 느낄 수 있는 날입니다.",
+        future: "목표하던 바를 성공적으로 달성하고 더 넓은 무대로 나아가게 됩니다."
+      }
+    ];
+
+    const POSITIONS = [
+      { key: "past", label: "과거" },
+      { key: "present", label: "현재" },
+      { key: "future", label: "미래" }
+    ];
+
+    // 각 카드별 단순하고 선명한 벡터 그림 생성
+    function getCardArtSVG(art) {
+      const stroke = "#2a1b4e";
+      const gold = "#c79932";
+      const accent = "#5c3b9c";
+      const commonStart = `<svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="6" width="88" height="118" rx="6" stroke="${gold}" stroke-width="1.5" fill="rgba(232,196,104,0.08)"/>`;
+      const commonEnd = `</svg>`;
+
+      const shapes = {
+        fool: `
+          <circle cx="72" cy="28" r="10" fill="${gold}"/>
+          <path d="M20 108 L55 75 L82 108 Z" fill="rgba(92,59,156,0.2)" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="48" cy="46" r="8" stroke="${stroke}" stroke-width="2" fill="#fff"/>
+          <path d="M48 54 L48 78 M48 60 L34 50 M48 60 L64 52" stroke="${stroke}" stroke-width="2" stroke-linecap="round"/>
+          <line x1="30" y1="62" x2="66" y2="38" stroke="${gold}" stroke-width="2.2"/>
+          <circle cx="66" cy="44" r="6" fill="${accent}"/>`,
+        magician: `
+          <path d="M36 26 C36 18, 48 18, 50 26 C52 34, 64 34, 64 26 C64 18, 52 18, 50 26 C48 34, 36 34, 36 26 Z" stroke="${gold}" stroke-width="2.2" fill="none"/>
+          <rect x="46" y="42" width="8" height="44" rx="4" fill="${accent}" stroke="${stroke}" stroke-width="2"/>
+          <polygon points="50,94 42,108 58,108" fill="${gold}" stroke="${stroke}" stroke-width="1.5"/>
+          <circle cx="28" cy="64" r="6" stroke="${stroke}" stroke-width="2" fill="${gold}"/>
+          <path d="M68 58 L76 70 L60 70 Z" stroke="${stroke}" stroke-width="2" fill="${gold}"/>`,
+        priestess: `
+          <rect x="18" y="22" width="12" height="86" fill="rgba(42,27,78,0.2)" stroke="${stroke}" stroke-width="2"/>
+          <rect x="70" y="22" width="12" height="86" fill="rgba(232,196,104,0.35)" stroke="${stroke}" stroke-width="2"/>
+          <path d="M50 34 A16 16 0 1 0 50 66 A12 12 0 1 1 50 34 Z" fill="${gold}" stroke="${stroke}" stroke-width="1.8"/>
+          <rect x="38" y="76" width="24" height="14" rx="2" fill="#fff" stroke="${stroke}" stroke-width="2"/>`,
+        empress: `
+          <polygon points="26,44 36,26 50,38 64,26 74,44" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="50" cy="64" r="16" stroke="${stroke}" stroke-width="2.2" fill="rgba(232,196,104,0.25)"/>
+          <line x1="50" y1="80" x2="50" y2="104" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="38" y1="92" x2="62" y2="92" stroke="${stroke}" stroke-width="2.2"/>`,
+        emperor: `
+          <rect x="24" y="36" width="52" height="62" rx="4" fill="rgba(92,59,156,0.18)" stroke="${stroke}" stroke-width="2"/>
+          <polygon points="28,36 38,20 50,32 62,20 72,36" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="50" cy="66" r="12" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <path d="M50 50 L50 82 M34 66 L66 66" stroke="${stroke}" stroke-width="2"/>`,
+        hierophant: `
+          <line x1="50" y1="20" x2="50" y2="106" stroke="${stroke}" stroke-width="2.5"/>
+          <line x1="38" y1="32" x2="62" y2="32" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="32" y1="44" x2="68" y2="44" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="36" y1="56" x2="64" y2="56" stroke="${stroke}" stroke-width="2.2"/>
+          <circle cx="38" cy="84" r="7" stroke="${gold}" stroke-width="2.2" fill="none"/>
+          <circle cx="62" cy="84" r="7" stroke="${gold}" stroke-width="2.2" fill="none"/>`,
+        lovers: `
+          <circle cx="50" cy="34" r="11" fill="${gold}"/>
+          <path d="M50 88 C50 88 24 68 24 52 C24 43 34 38 42 46 L50 54 L58 46 C66 38 76 43 76 52 C76 68 50 88 50 88 Z" fill="rgba(214,90,130,0.35)" stroke="${stroke}" stroke-width="2"/>`,
+        chariot: `
+          <rect x="28" y="34" width="44" height="44" rx="4" fill="rgba(92,59,156,0.2)" stroke="${stroke}" stroke-width="2"/>
+          <polygon points="50,18 62,34 38,34" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="26" cy="84" r="12" stroke="${stroke}" stroke-width="2.5" fill="${gold}"/>
+          <circle cx="74" cy="84" r="12" stroke="${stroke}" stroke-width="2.5" fill="${gold}"/>
+          <polygon points="50,46 54,56 64,56 56,62 59,72 50,66 41,72 44,62 36,56 46,56" fill="${gold}"/>`,
+        strength: `
+          <path d="M36 28 C36 20, 48 20, 50 28 C52 36, 64 36, 64 28 C64 20, 52 20, 50 28 C48 36, 36 36, 36 28 Z" stroke="${gold}" stroke-width="2.2" fill="none"/>
+          <circle cx="50" cy="68" r="22" fill="rgba(232,196,104,0.35)" stroke="${stroke}" stroke-width="2"/>
+          <polygon points="50,52 64,78 36,78" fill="${gold}" stroke="${stroke}" stroke-width="2"/>`,
+        hermit: `
+          <line x1="66" y1="22" x2="66" y2="108" stroke="${stroke}" stroke-width="2.5"/>
+          <line x1="66" y1="26" x2="44" y2="26" stroke="${stroke}" stroke-width="2.2"/>
+          <polygon points="44,32 54,50 34,50" fill="${gold}" stroke="${stroke}" stroke-width="1.8"/>
+          <polygon points="44,58 54,40 34,40" fill="rgba(232,196,104,0.5)" stroke="${stroke}" stroke-width="1.8"/>
+          <path d="M26 106 L44 68 L60 106 Z" fill="rgba(42,27,78,0.22)" stroke="${stroke}" stroke-width="2"/>`,
+        wheel: `
+          <circle cx="50" cy="65" r="28" stroke="${stroke}" stroke-width="2.5" fill="rgba(232,196,104,0.22)"/>
+          <circle cx="50" cy="65" r="10" stroke="${stroke}" stroke-width="2" fill="${gold}"/>
+          <line x1="50" y1="33" x2="50" y2="97" stroke="${stroke}" stroke-width="2"/>
+          <line x1="18" y1="65" x2="82" y2="65" stroke="${stroke}" stroke-width="2"/>
+          <line x1="28" y1="43" x2="72" y2="87" stroke="${stroke}" stroke-width="2"/>
+          <line x1="72" y1="43" x2="28" y2="87" stroke="${stroke}" stroke-width="2"/>`,
+        justice: `
+          <line x1="50" y1="22" x2="50" y2="104" stroke="${stroke}" stroke-width="2.5"/>
+          <line x1="22" y1="44" x2="78" y2="44" stroke="${stroke}" stroke-width="2.2"/>
+          <path d="M22 44 L14 68 L30 68 Z" fill="${gold}" stroke="${stroke}" stroke-width="1.8"/>
+          <path d="M78 44 L70 68 L86 68 Z" fill="${gold}" stroke="${stroke}" stroke-width="1.8"/>
+          <rect x="36" y="100" width="28" height="6" fill="${stroke}"/>`,
+        hanged: `
+          <line x1="20" y1="24" x2="80" y2="24" stroke="${stroke}" stroke-width="3"/>
+          <line x1="50" y1="24" x2="50" y2="52" stroke="${stroke}" stroke-width="2"/>
+          <polygon points="50,82 34,54 66,54" fill="rgba(92,59,156,0.25)" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="50" cy="94" r="9" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="50" cy="94" r="15" stroke="${gold}" stroke-width="1.5" stroke-dasharray="3 3" fill="none"/>`,
+        death: `
+          <path d="M18 98 Q50 76 82 98 L82 110 L18 110 Z" fill="rgba(42,27,78,0.25)" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="50" cy="76" r="14" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="50" cy="40" r="12" stroke="${stroke}" stroke-width="2" fill="#fff"/>
+          <line x1="50" y1="28" x2="50" y2="52" stroke="${stroke}" stroke-width="1.8"/>
+          <line x1="38" y1="40" x2="62" y2="40" stroke="${stroke}" stroke-width="1.8"/>`,
+        temperance: `
+          <polygon points="24,36 42,36 38,54 28,54" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <polygon points="58,76 76,76 72,94 62,94" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <path d="M36 54 C42 66, 58 64, 64 76" stroke="${accent}" stroke-width="3" stroke-dasharray="4 2" fill="none"/>
+          <circle cx="50" cy="30" r="7" fill="rgba(232,196,104,0.5)" stroke="${stroke}" stroke-width="1.5"/>`,
+        devil: `
+          <polygon points="50,86 26,42 74,42" fill="rgba(42,27,78,0.25)" stroke="${stroke}" stroke-width="2.2"/>
+          <path d="M32 38 Q22 22 36 24 M68 38 Q78 22 64 24" stroke="${stroke}" stroke-width="2.5" fill="none"/>
+          <circle cx="40" cy="98" r="6" stroke="${stroke}" stroke-width="2" fill="none"/>
+          <circle cx="60" cy="98" r="6" stroke="${stroke}" stroke-width="2" fill="none"/>
+          <line x1="46" y1="98" x2="54" y2="98" stroke="${stroke}" stroke-width="2"/>`,
+        tower: `
+          <rect x="34" y="44" width="32" height="64" fill="rgba(42,27,78,0.22)" stroke="${stroke}" stroke-width="2.2"/>
+          <polygon points="30,44 40,28 50,38 60,28 70,44" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <polyline points="78,20 56,42 66,46 44,68" stroke="#d9534f" stroke-width="2.8" fill="none"/>`,
+        star: `
+          <polygon points="50,22 56,42 76,42 60,54 66,74 50,62 34,74 40,54 24,42 44,42" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="26" cy="28" r="3.5" fill="${accent}"/>
+          <circle cx="74" cy="28" r="3.5" fill="${accent}"/>
+          <path d="M20 96 Q35 88 50 96 T80 96" stroke="${accent}" stroke-width="2.2" fill="none"/>`,
+        moon: `
+          <circle cx="50" cy="52" r="24" fill="rgba(232,196,104,0.3)" stroke="${stroke}" stroke-width="2"/>
+          <path d="M54 32 A18 18 0 1 0 54 72 A14 14 0 1 1 54 32 Z" fill="${gold}" stroke="${stroke}" stroke-width="1.8"/>
+          <polygon points="22,104 22,78 34,78 34,104" fill="rgba(42,27,78,0.3)" stroke="${stroke}" stroke-width="1.8"/>
+          <polygon points="66,104 66,78 78,78 78,104" fill="rgba(42,27,78,0.3)" stroke="${stroke}" stroke-width="1.8"/>`,
+        sun: `
+          <circle cx="50" cy="62" r="20" fill="${gold}" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="50" y1="28" x2="50" y2="36" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="50" y1="88" x2="50" y2="96" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="16" y1="62" x2="24" y2="62" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="76" y1="62" x2="84" y2="62" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="26" y1="38" x2="32" y2="44" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="68" y1="80" x2="74" y2="86" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="74" y1="38" x2="68" y2="44" stroke="${stroke}" stroke-width="2.2"/>
+          <line x1="32" y1="80" x2="26" y2="86" stroke="${stroke}" stroke-width="2.2"/>`,
+        judgement: `
+          <polygon points="46,24 54,24 64,62 36,62" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <line x1="50" y1="68" x2="50" y2="84" stroke="${stroke}" stroke-width="2"/>
+          <line x1="34" y1="74" x2="66" y2="74" stroke="${stroke}" stroke-width="2"/>
+          <path d="M24 102 Q50 86 76 102" stroke="${accent}" stroke-width="2.2" fill="none"/>`,
+        world: `
+          <ellipse cx="50" cy="65" rx="26" ry="36" stroke="${stroke}" stroke-width="2.5" stroke-dasharray="5 3" fill="rgba(232,196,104,0.18)"/>
+          <circle cx="50" cy="65" r="14" fill="${gold}" stroke="${stroke}" stroke-width="2"/>
+          <circle cx="22" cy="26" r="4" fill="${accent}"/>
+          <circle cx="78" cy="26" r="4" fill="${accent}"/>
+          <circle cx="22" cy="104" r="4" fill="${accent}"/>
+          <circle cx="78" cy="104" r="4" fill="${accent}"/>`
+      };
+
+      return commonStart + (shapes[art] || shapes.star) + commonEnd;
+    }
+
+    // 카드 뒷면 금빛 기하학 무늬 SVG
+    function getCardBackSVG() {
+      return `
+        <svg viewBox="0 0 120 190" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="112" height="182" rx="8" fill="none" stroke="#e8c468" stroke-width="1.6"/>
+          <rect x="10" y="10" width="100" height="170" rx="5" fill="none" stroke="#9e7f34" stroke-width="1"/>
+          <polygon points="60,22 96,95 60,168 24,95" fill="none" stroke="#e8c468" stroke-width="1.4"/>
+          <polygon points="60,38 84,95 60,152 36,95" fill="rgba(232,196,104,0.08)" stroke="#e8c468" stroke-width="1"/>
+          <circle cx="60" cy="95" r="24" fill="none" stroke="#ffe699" stroke-width="1.5"/>
+          <circle cx="60" cy="95" r="6" fill="#ffe699"/>
+          <circle cx="60" cy="22" r="3" fill="#e8c468"/>
+          <circle cx="60" cy="168" r="3" fill="#e8c468"/>
+          <circle cx="20" cy="20" r="3" fill="#e8c468"/>
+          <circle cx="100" cy="20" r="3" fill="#e8c468"/>
+          <circle cx="20" cy="170" r="3" fill="#e8c468"/>
+          <circle cx="100" cy="170" r="3" fill="#e8c468"/>
+        </svg>
+      `;
+    }
+
+    // 상태 변수
+    let selectedCards = []; // 3장의 뽑힌 카드 객체
+    let flippedState = [false, false, false];
+    let lastFocusedIndex = -1;
+
+    // Web Audio API (배경음 및 효과음 - 처음엔 꺼져 있음)
+    let soundEnabled = false;
+    let audioCtx = null;
+    let bgmNodes = [];
+    let bgmInterval = null;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    }
+
+    function startBGM() {
+      if (!soundEnabled) return;
+      initAudioContext();
+      stopBGM();
+
+      // 잔잔한 신비로운 화음 패드 (A minor 9th 계열)
+      const freqs = [220, 261.63, 329.63, 392.00];
+      const masterGain = audioCtx.createGain();
+      masterGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      masterGain.gain.exponentialRampToValueAtTime(0.05, audioCtx.currentTime + 1.2);
+      masterGain.connect(audioCtx.destination);
+
+      const oscs = freqs.map((f) => {
+        const osc = audioCtx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+        osc.connect(masterGain);
+        osc.start();
+        return osc;
+      });
+
+      bgmNodes = { oscs, masterGain };
+
+      // 은은한 별빛 벨 소리 주기적 재생
+      bgmInterval = setInterval(() => {
+        if (!soundEnabled || !audioCtx) return;
+        const notes = [523.25, 659.25, 783.99, 880, 1046.5];
+        const note = notes[Math.floor(Math.random() * notes.length)];
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(note, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.025, audioCtx.currentTime + 0.1);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.2);
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 2.3);
+      }, 3200);
+    }
+
+    function stopBGM() {
+      if (bgmInterval) {
+        clearInterval(bgmInterval);
+        bgmInterval = null;
+      }
+      if (bgmNodes && bgmNodes.oscs) {
+        try {
+          bgmNodes.masterGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+          bgmNodes.oscs.forEach((o) => o.stop());
+        } catch (e) {}
+      }
+      bgmNodes = [];
+    }
+
+    function playFlipSound(index) {
+      if (!soundEnabled) return;
+      initAudioContext();
+      const now = audioCtx.currentTime;
+      const baseNotes = [440, 523.25, 659.25];
+      const base = baseNotes[index] || 523.25;
+
+      [base, base * 1.25, base * 1.5].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freq, now + i * 0.07);
+        gain.gain.setValueAtTime(0.001, now + i * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.11, now + i * 0.07 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.07 + 0.55);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + i * 0.07);
+        osc.stop(now + i * 0.07 + 0.6);
+      });
+    }
+
+    function playResetSound() {
+      if (!soundEnabled) return;
+      initAudioContext();
+      const now = audioCtx.currentTime;
+      [659.25, 523.25, 392.0].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + i * 0.05);
+        gain.gain.setValueAtTime(0.06, now + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.05 + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + i * 0.05);
+        osc.stop(now + i * 0.05 + 0.35);
+      });
+    }
+
+    // 22장 중 겹치지 않게 무작위 3장 뽑기 (Fisher-Yates 셔플)
+    function pickThreeUniqueCards() {
+      const pool = [...MAJOR_ARCANA];
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      return pool.slice(0, 3);
+    }
+
+    // 카드 테이블 렌더링
+    function renderCards() {
+      const row = document.getElementById("cardsRow");
+      row.innerHTML = "";
+
+      POSITIONS.forEach((pos, idx) => {
+        const card = selectedCards[idx];
+        const slot = document.createElement("div");
+        slot.className = "card-slot";
+
+        const label = document.createElement("div");
+        label.className = "slot-label";
+        label.textContent = pos.label;
+
+        const container = document.createElement("div");
+        container.className = "card-container" + (flippedState[idx] ? " flipped" : "");
+        container.setAttribute("role", "button");
+        container.setAttribute("tabindex", "0");
+        container.setAttribute("aria-label", `${pos.label} 카드 뒤집기`);
+
+        container.innerHTML = `
+          <div class="card-inner">
+            <div class="card-face card-back">
+              ${getCardBackSVG()}
+            </div>
+            <div class="card-face card-front">
+              <div class="card-num">${card.roman}</div>
+              <div class="card-art">${getCardArtSVG(card.art)}</div>
+              <div>
+                <div class="card-title-kr">${card.kr}</div>
+                <div class="card-title-en">${card.en}</div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.addEventListener("click", () => handleCardClick(idx));
+        container.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleCardClick(idx);
+          }
+        });
+
+        slot.appendChild(label);
+        slot.appendChild(container);
+        row.appendChild(slot);
+      });
+    }
+
+    // 카드 클릭 처리 (이미 뒤집힌 카드는 다시 눌러도 바뀌지 않음)
+    function handleCardClick(idx) {
+      if (flippedState[idx]) {
+        lastFocusedIndex = idx;
+        renderReadings();
+        return;
+      }
+
+      flippedState[idx] = true;
+      lastFocusedIndex = idx;
+      playFlipSound(idx);
+
+      const containers = document.querySelectorAll(".card-container");
+      if (containers[idx]) {
+        containers[idx].classList.add("flipped");
+      }
+
+      updateGuideBanner();
+      renderReadings();
+    }
+
+    function updateGuideBanner() {
+      const count = flippedState.filter(Boolean).length;
+      const banner = document.getElementById("guideBanner");
+      if (count === 0) {
+        banner.textContent = "카드를 차례대로 눌러 과거 · 현재 · 미래의 운세를 확인해 보세요.";
+      } else if (count < 3) {
+        banner.textContent = `카드 ${count}장을 확인했습니다. 남은 카드도 눌러 뒤집어 보세요.`;
+      } else {
+        banner.textContent = "과거 · 현재 · 미래 3장의 카드가 모두 공개되었습니다!";
+      }
+    }
+
+    // 설명 상자 업데이트
+    function renderReadings() {
+      const count = flippedState.filter(Boolean).length;
+      const statusEl = document.getElementById("readingStatus");
+      const contentEl = document.getElementById("readingContent");
+      statusEl.textContent = `뒤집힌 카드: ${count} / 3`;
+
+      if (count === 0) {
+        contentEl.innerHTML = `
+          <div class="reading-empty">
+            아직 뒤집힌 카드가 없습니다.<br/>
+            테이블 위의 <strong>과거 · 현재 · 미래</strong> 카드를 눌러 뒤집어 보세요.
+          </div>
+        `;
+        return;
+      }
+
+      const list = document.createElement("div");
+      list.className = "reading-list";
+
+      POSITIONS.forEach((pos, idx) => {
+        const isRevealed = flippedState[idx];
+        const card = selectedCards[idx];
+        const item = document.createElement("div");
+        item.className = "reading-item" +
+          (isRevealed ? " revealed" : "") +
+          (isRevealed && lastFocusedIndex === idx ? " active-focus" : "");
+
+        if (isRevealed) {
+          item.innerHTML = `
+            <div class="reading-badge-row">
+              <span class="pos-badge">${pos.label}</span>
+              <span class="reading-card-name">${card.roman}. ${card.kr} (${card.en}) · ${pos.label}</span>
+            </div>
+            <p class="reading-desc">${card[pos.key]}</p>
+          `;
+        } else {
+          item.innerHTML = `
+            <div class="reading-badge-row">
+              <span class="pos-badge">${pos.label}</span>
+              <span class="reading-card-name">아직 뒤집히지 않음</span>
+            </div>
+            <p class="reading-desc">테이블에서 '${pos.label}' 카드를 누르면 이 위치에 맞는 해석이 표시됩니다.</p>
+          `;
+        }
+
+        list.appendChild(item);
+      });
+
+      contentEl.innerHTML = "";
+      contentEl.appendChild(list);
+    }
+
+    // 다시 뽑기 기능
+    function resetSpread() {
+      playResetSound();
+      flippedState = [false, false, false];
+      lastFocusedIndex = -1;
+
+      const containers = document.querySelectorAll(".card-container");
+      containers.forEach((c) => c.classList.remove("flipped"));
+
+      updateGuideBanner();
+      renderReadings();
+
+      // 카드가 뒷면으로 돌아가는 애니메이션 후 새 카드 3장 배정
+      setTimeout(() => {
+        selectedCards = pickThreeUniqueCards();
+        renderCards();
+      }, 280);
+    }
+
+    // 소리 켜기 / 끄기 토글
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById("soundBtn");
+      const icon = document.getElementById("soundIcon");
+      const label = document.getElementById("soundLabel");
+
+      btn.setAttribute("aria-pressed", String(soundEnabled));
+      if (soundEnabled) {
+        btn.classList.add("sound-active");
+        icon.textContent = "🔊";
+        label.textContent = "소리 끄기";
+        startBGM();
+      } else {
+        btn.classList.remove("sound-active");
+        icon.textContent = "🔇";
+        label.textContent = "소리 켜기";
+        stopBGM();
+      }
+    }
+
+    // 초기 실행
+    document.getElementById("resetBtn").addEventListener("click", resetSpread);
+    document.getElementById("soundBtn").addEventListener("click", toggleSound);
+
+    selectedCards = pickThreeUniqueCards();
+    renderCards();
+    renderReadings();
+  </script>
+</body>
+</html>

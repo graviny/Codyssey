@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>등각 타로 한 판</title>
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{overflow-x:hidden}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% 30%,#2a1a55,#0b0a24 70%);color:#eadfff;font-family:"Malgun Gothic",sans-serif;display:flex;flex-direction:column;align-items:center;padding:16px 12px 28px}
+h1{font-size:clamp(20px,5vw,30px);color:#f0d27a;letter-spacing:2px;text-shadow:0 0 12px #c9a13b88}
+.bar{display:flex;gap:10px;margin:10px 0}
+button{background:#1b1440;color:#f0d27a;border:1px solid #c9a13b;border-radius:20px;padding:8px 18px;font:inherit;cursor:pointer}
+button:hover{background:#2e2266}
+/* 테이블 */
+.stage{position:relative;width:min(100%,760px);height:clamp(330px,62vw,470px);margin-top:6px}
+.table{position:absolute;left:50%;top:58%;width:min(78vw,520px);aspect-ratio:1;transform:translate(-50%,-50%) rotateX(60deg) rotateZ(45deg) scaleY(1.0);border-radius:14px;
+ background:repeating-linear-gradient(45deg,#3b1f78 0 8px,#2f1a66 8px 16px);border:6px solid #1a0f3d;box-shadow:0 30px 0 #120a2e,0 40px 60px #000a,inset 0 0 70px #0b0a2488}
+.stage{perspective:none}
+.table::after{content:"";position:absolute;inset:14px;border:2px dashed #c9a13b66;border-radius:8px}
+.deco{position:absolute;width:44px;height:60px}
+.candle.l{left:3%;top:6%}.candle.r{right:3%;top:6%}
+.orb{left:50%;top:-1%;transform:translateX(-50%);width:50px;height:64px}
+.rune{bottom:9%;width:40px;height:40px;animation:glow 3s infinite alternate}
+.rune.l{left:6%}.rune.r{right:6%}
+.flame{animation:flick .5s infinite alternate;transform-origin:50% 100%}
+@keyframes flick{to{transform:scale(.85,1.1)}}
+@keyframes glow{to{filter:drop-shadow(0 0 8px #7ff)}}
+/* 카드 */
+.cards{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);display:flex;justify-content:center;gap:clamp(8px,3vw,28px)}
+.slot{display:flex;flex-direction:column;align-items:center;gap:6px}
+.label{font-size:13px;color:#f0d27a;background:#0b0a2499;padding:2px 10px;border-radius:10px}
+.card{width:clamp(78px,24vw,140px);aspect-ratio:2/3;perspective:700px;cursor:pointer;transition:transform .25s,filter .25s}
+@media (hover:hover){.card:not(.flip):hover{transform:translateY(-14px);filter:drop-shadow(0 0 14px #f0d27a)}}
+.inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s}
+.flip .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;border:3px solid #c9a13b;overflow:hidden}
+.back{background:radial-gradient(circle,#4a2c9a,#1d1148)}
+.front{transform:rotateY(180deg);background:#f4ead0;color:#2a1a55;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 2px;text-align:center}
+.front svg{width:80%;flex:1;min-height:0}
+.front b{font-size:clamp(10px,2.6vw,14px)}.front small{font-size:clamp(8px,2vw,10px);color:#6a5a8a}
+.card.flip{cursor:default}
+/* 설명 */
+#info{width:min(100%,640px);min-height:130px;margin-top:8px;background:#120d33cc;border:1px solid #c9a13b88;border-radius:12px;padding:14px 16px;line-height:1.7}
+#info p{margin-bottom:8px}#info p:last-child{margin:0}
+#info b{color:#f0d27a}.hint{color:#9a8cc4}
+</style>
+</head>
+<body>
+<h1>✦ 등각 타로 한 판 ✦</h1>
+<div class="bar"><button id="again">다시 뽑기</button><button id="snd">소리: 꺼짐</button></div>
+
+<div class="stage">
+ <div class="table"></div>
+ <svg class="deco candle l" style="position:absolute" viewBox="0 0 44 60"><rect x="14" y="26" width="16" height="32" fill="#efe3c0"/><path class="flame" d="M22 4C30 14 30 24 22 26 14 24 14 14 22 4Z" fill="#ffb347"/></svg>
+ <svg class="deco candle r" style="position:absolute" viewBox="0 0 44 60"><rect x="14" y="26" width="16" height="32" fill="#efe3c0"/><path class="flame" d="M22 4C30 14 30 24 22 26 14 24 14 14 22 4Z" fill="#ffb347"/></svg>
+ <svg class="deco orb" style="position:absolute" viewBox="0 0 50 64"><path d="M10 62h30l-6-14H16z" fill="#c9a13b"/><circle cx="25" cy="28" r="22" fill="#8fd8ff88" stroke="#bff" stroke-width="2"/><circle cx="18" cy="20" r="5" fill="#fff8"/></svg>
+ <svg class="deco rune l" style="position:absolute" viewBox="0 0 40 40"><path d="M12 4v32M12 8l16 12-16 12" stroke="#7ff" stroke-width="3" fill="none"/></svg>
+ <svg class="deco rune r" style="position:absolute" viewBox="0 0 40 40"><path d="M8 4l24 32M32 4L8 36M20 4v32" stroke="#7ff" stroke-width="3" fill="none"/></svg>
+ <div class="cards" id="cards"></div>
+</div>
+
+<div id="info"><p class="hint">카드를 눌러 과거 · 현재 · 미래를 뒤집어 보세요. (재미로 보는 운세입니다)</p></div>
+
+<script>
+// 카드: [한글, 영문, 그림(svg 내부), 과거, 현재, 미래]
+const G='#c9a13b',P='#4a2c9a';
+const D=[
+["광대","The Fool",`<circle cx="50" cy="35" r="14" fill="${P}"/><path d="M20 90l30-40 30 40z" fill="${G}"/>`,"가볍게 시작했던 일이 지금의 바탕이 되었어요.","새로운 시작 앞에 서 있어요. 겁내지 말고 한 걸음 내디뎌 보세요.","뜻밖의 모험이 기다리고 있어요."],
+["마법사","The Magician",`<path d="M50 10v70" stroke="${P}" stroke-width="6"/><circle cx="50" cy="20" r="12" fill="${G}"/><path d="M30 90h40" stroke="${P}" stroke-width="6"/>`,"스스로 만들어 낸 재주가 힘이 되었어요.","필요한 재료는 이미 손안에 있어요. 지금 실행해 보세요.","원하는 것을 직접 만들어 낼 기회가 와요."],
+["여사제","The High Priestess",`<circle cx="50" cy="50" r="28" fill="${P}"/><circle cx="60" cy="50" r="24" fill="#f4ead0"/>`,"말하지 않은 직감이 큰 역할을 했어요.","조용히 내 마음의 소리를 들어볼 때예요.","숨겨진 이야기가 서서히 드러나요."],
+["여황제","The Empress",`<circle cx="50" cy="45" r="22" fill="${G}"/><path d="M50 67v25M38 80l12-8 12 8" stroke="${P}" stroke-width="5" fill="none"/>`,"넉넉한 보살핌 속에서 자랐어요.","풍요롭고 따뜻한 시기예요. 주변과 나눠 보세요.","노력한 일이 풍성한 열매를 맺어요."],
+["황제","The Emperor",`<rect x="28" y="28" width="44" height="44" fill="${P}"/><path d="M28 28l22-18 22 18z" fill="${G}"/>`,"든든한 규칙과 질서가 나를 지켜 주었어요.","계획을 세우고 책임감 있게 밀고 나가세요.","안정적인 자리를 얻게 돼요."],
+["교황","The Hierophant",`<path d="M50 8v84M30 28h40M36 50h28" stroke="${P}" stroke-width="6"/>`,"배움과 전통에서 힘을 얻었어요.","믿을 만한 조언자에게 물어보면 좋아요.","좋은 스승이나 모임을 만나요."],
+["연인","The Lovers",`<path d="M50 85C10 55 25 20 50 42 75 20 90 55 50 85Z" fill="${P}"/><circle cx="50" cy="42" r="6" fill="${G}"/>`,"소중한 사람과의 인연이 큰 영향을 주었어요.","마음이 끌리는 쪽을 솔직하게 고를 때예요.","따뜻한 관계나 즐거운 선택이 다가와요."],
+["전차","The Chariot",`<rect x="22" y="40" width="56" height="26" fill="${P}"/><circle cx="32" cy="72" r="10" fill="${G}"/><circle cx="68" cy="72" r="10" fill="${G}"/><path d="M50 40V14" stroke="${G}" stroke-width="5"/>`,"강한 의지로 앞으로 나아갔어요.","목표를 향해 속도를 낼 때예요. 방향만 잘 잡으세요.","노력 끝에 승리의 순간이 와요."],
+["힘","Strength",`<circle cx="50" cy="45" r="26" fill="${G}"/><path d="M50 71c-14 0-14 22 0 22s14-22 0-22" fill="${P}"/>`,"부드러운 인내로 어려움을 넘겼어요.","조급해하지 말고 다정하게 밀어붙이면 돼요.","내면의 용기가 단단해져요."],
+["은둔자","The Hermit",`<path d="M50 18l-20 72h40z" fill="${P}"/><circle cx="50" cy="14" r="8" fill="${G}"/>`,"혼자 보낸 시간이 나를 키웠어요.","잠시 멈추고 나를 돌아보기 좋은 때예요.","스스로 길을 밝혀 줄 깨달음을 얻어요."],
+["운명의 수레바퀴","Wheel of Fortune",`<circle cx="50" cy="50" r="34" fill="none" stroke="${P}" stroke-width="6"/><path d="M50 16v68M16 50h68M26 26l48 48M74 26L26 74" stroke="${G}" stroke-width="4"/>`,"한 번의 전환점이 흐름을 바꿔 놓았어요.","상황이 돌고 있어요. 흐름에 올라타 보세요.","행운의 방향으로 판이 바뀌어요."],
+["정의","Justice",`<path d="M50 12v70M20 30h60" stroke="${P}" stroke-width="5"/><path d="M12 56l8-26 8 26zM72 56l8-26 8 26z" fill="${G}"/>`,"공정한 판단이 지금의 결과를 만들었어요.","균형 있게 따져 보고 결정하세요.","한 만큼 돌려받는 좋은 결과가 와요."],
+["매달린 사람","The Hanged Man",`<path d="M20 14h60" stroke="${P}" stroke-width="6"/><path d="M50 14v28" stroke="${P}" stroke-width="4"/><circle cx="50" cy="78" r="12" fill="${G}"/><path d="M50 42v24" stroke="${G}" stroke-width="8"/>`,"잠시 멈춰 서서 기다린 시간이 있었어요.","관점을 뒤집어 보면 답이 보여요.","기다림 끝에 새로운 시각이 열려요."],
+["죽음","Death",`<circle cx="50" cy="40" r="22" fill="${P}"/><rect x="36" y="58" width="28" height="14" fill="${P}"/><circle cx="42" cy="38" r="5" fill="#f4ead0"/><circle cx="58" cy="38" r="5" fill="#f4ead0"/><path d="M14 90h72" stroke="${G}" stroke-width="5"/>`,"하나의 시기가 마무리되었어요.","낡은 것을 놓아 주면 새것이 들어와요.","끝이 곧 새 출발이 되는 변화가 와요."],
+["절제","Temperance",`<path d="M30 20h14v30H30zM56 50h14v30H56z" fill="${P}"/><path d="M44 30C60 30 40 70 56 70" stroke="${G}" stroke-width="5" fill="none"/>`,"서두르지 않고 균형을 맞춰 왔어요.","적당히 섞고 조절하는 것이 열쇠예요.","차분한 조화 속에 안정이 찾아와요."],
+["악마","The Devil",`<path d="M30 14l10 22M70 14L60 36" stroke="${G}" stroke-width="6"/><circle cx="50" cy="56" r="24" fill="${P}"/><circle cx="42" cy="52" r="4" fill="${G}"/><circle cx="58" cy="52" r="4" fill="${G}"/>`,"나쁜 습관이나 유혹에 끌린 적이 있어요.","나를 붙잡는 것이 무엇인지 살펴보세요.","놓아 버릴 용기가 자유를 줘요."],
+["탑","The Tower",`<path d="M36 90V30h28v60z" fill="${P}"/><path d="M60 8L44 36h14L42 60" stroke="${G}" stroke-width="5" fill="none"/>`,"갑작스러운 변화가 한 번 흔들어 놓았어요.","무너지는 것 같아도 새 기초를 세울 기회예요.","뜻밖의 일이 낡은 틀을 깨 줘요."],
+["별","The Star",`<path d="M50 10l9 26h27l-22 16 8 26-22-16-22 16 8-26L14 36h27z" fill="${G}"/>`,"어려운 때에도 희망을 잃지 않았어요.","마음이 맑아지고 희망이 보이는 때예요.","소원이 천천히 이루어져요."],
+["달","The Moon",`<path d="M62 14a36 36 0 1 0 0 72 28 28 0 1 1 0-72z" fill="${G}"/><circle cx="30" cy="80" r="5" fill="${P}"/>`,"흐릿한 불안이 마음을 감쌌던 적이 있어요.","확실하지 않은 것이 많아요. 서두르지 마세요.","안개가 걷히며 진실이 보여요."],
+["태양","The Sun",`<circle cx="50" cy="50" r="20" fill="${G}"/><path d="M50 8v14M50 78v14M8 50h14M78 50h14M20 20l10 10M70 70l10 10M80 20L70 30M30 70L20 80" stroke="${G}" stroke-width="5"/>`,"밝고 즐거운 기억이 힘이 되고 있어요.","기운이 넘치는 날이에요. 마음껏 웃으세요.","환한 성공과 기쁨이 찾아와요."],
+["심판","Judgement",`<path d="M20 60l40-30v60z" fill="${P}"/><path d="M66 38c10 4 10 22 0 26M76 30c16 6 16 34 0 40" stroke="${G}" stroke-width="4" fill="none"/>`,"지난 선택을 돌아보고 깨달음을 얻었어요.","부름에 응답하고 새롭게 거듭날 때예요.","중요한 결정과 새로운 단계가 열려요."],
+["세계","The World",`<ellipse cx="50" cy="50" rx="26" ry="36" fill="none" stroke="${G}" stroke-width="6"/><circle cx="50" cy="50" r="10" fill="${P}"/>`,"한 과정을 훌륭하게 마쳤어요.","모든 조각이 맞춰지는 완성의 시기예요.","목표를 이루고 다음 무대로 나아가요."]
+];
+const POS=["과거","현재","미래"];
+const $=id=>document.getElementById(id);
+let pick=[],shown=[];
+
+function deal(){
+  const idx=[...D.keys()];
+  pick=[];
+  for(let i=0;i<3;i++)pick.push(idx.splice(Math.floor(Math.random()*idx.length),1)[0]);
+  shown=[false,false,false];
+  $('cards').innerHTML=pick.map((n,i)=>{const c=D[n];return `<div class="slot"><div class="card" data-i="${i}"><div class="inner"><div class="face back"><svg viewBox="0 0 100 150" width="100%" height="100%"><rect x="8" y="8" width="84" height="134" fill="none" stroke="${G}" stroke-width="2"/><circle cx="50" cy="75" r="26" fill="none" stroke="${G}" stroke-width="2"/><path d="M50 40l7 28 28 7-28 7-7 28-7-28-28-7 28-7z" fill="${G}"/></svg></div><div class="face front"><svg viewBox="0 0 100 100">${c[2]}</svg><b>${c[0]}</b><small>${c[1]}</small></div></div></div><span class="label">${POS[i]}</span></div>`}).join('');
+  $('info').innerHTML='<p class="hint">카드를 눌러 과거 · 현재 · 미래를 뒤집어 보세요. (재미로 보는 운세입니다)</p>';
+}
+function render(){
+  $('info').innerHTML=shown.map((s,i)=>s?`<p><b>${D[pick[i]][0]} · ${POS[i]}</b><br>${D[pick[i]][3+i]}</p>`:'').join('');
+}
+$('cards').onclick=e=>{
+  const c=e.target.closest('.card');if(!c)return;
+  const i=+c.dataset.i;if(shown[i])return;
+  shown[i]=true;c.classList.add('flip');render();sfx();
+};
+$('again').onclick=deal;
+
+// 소리 (Web Audio, 사용자가 켜기 전에는 생성하지 않음)
+let ac,master,on=false;
+function startAmb(){
+  [110,164.8,220].forEach((f,k)=>{
+    const o=ac.createOscillator(),g=ac.createGain(),l=ac.createOscillator(),lg=ac.createGain();
+    o.type='sine';o.frequency.value=f;g.gain.value=.05;
+    l.frequency.value=.1+k*.07;lg.gain.value=.03;l.connect(lg);lg.connect(g.gain);
+    o.connect(g);g.connect(master);o.start();l.start();
+  });
+}
+function sfx(){
+  if(!on)return;
+  const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;
+  o.type='triangle';o.frequency.setValueAtTime(700,t);o.frequency.exponentialRampToValueAtTime(220,t+.25);
+  g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);
+  o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.3);
+}
+$('snd').onclick=()=>{
+  if(!ac){ac=new AudioContext();master=ac.createGain();master.connect(ac.destination);startAmb();}
+  on=!on;
+  master.gain.value=on?1:0;           // 배경음 끄기/켜기
+  on?ac.resume():ac.suspend();        // 끄면 모든 소리 정지
+  $('snd').textContent='소리: '+(on?'켜짐':'꺼짐');
+};
+deal();
+</script>
+</body>
+</html>
