@@ -12,34 +12,41 @@ h1{font-size:clamp(20px,5vw,30px);color:#f0d27a;letter-spacing:2px;text-shadow:0
 .bar{display:flex;gap:10px;margin:10px 0}
 button{background:#1b1440;color:#f0d27a;border:1px solid #c9a13b;border-radius:20px;padding:8px 18px;font:inherit;cursor:pointer}
 button:hover{background:#2e2266}
-/* 테이블 */
-.stage{position:relative;width:min(100%,760px);height:clamp(330px,62vw,470px);margin-top:6px}
-.table{position:absolute;left:50%;top:58%;width:min(78vw,520px);aspect-ratio:1;transform:translate(-50%,-50%) rotateX(60deg) rotateZ(45deg) scaleY(1.0);border-radius:14px;
- background:repeating-linear-gradient(45deg,#3b1f78 0 8px,#2f1a66 8px 16px);border:6px solid #1a0f3d;box-shadow:0 30px 0 #120a2e,0 40px 60px #000a,inset 0 0 70px #0b0a2488}
-.stage{perspective:none}
-.table::after{content:"";position:absolute;inset:14px;border:2px dashed #c9a13b66;border-radius:8px}
-.deco{position:absolute;width:44px;height:60px}
-.candle.l{left:3%;top:6%}.candle.r{right:3%;top:6%}
-.orb{left:50%;top:-1%;transform:translateX(-50%);width:50px;height:64px}
-.rune{bottom:9%;width:40px;height:40px;animation:glow 3s infinite alternate}
-.rune.l{left:6%}.rune.r{right:6%}
+/* 테이블: rotateX(60°) rotateZ(45°) = 등각. 카드·소품은 모두 테이블의 자식이라 같은 면 위에 놓임 */
+:root{--tw:min(68vw,520px)}
+.stage{position:relative;width:min(100%,780px);height:calc(var(--tw)*.95 + 30px);margin-top:6px}
+.table{position:absolute;left:50%;top:56%;width:var(--tw);aspect-ratio:1;transform:translate(-50%,-50%) rotateX(60deg) rotateZ(45deg);transform-style:preserve-3d;border-radius:14px;
+ background:repeating-linear-gradient(45deg,#3b1f78 0 8px,#2f1a66 8px 16px);border:6px solid #1a0f3d;box-shadow:inset 0 0 70px #0b0a2488}
+.table::after{content:"";position:absolute;inset:14px;border:2px dashed #c9a13b66;border-radius:8px;pointer-events:none}
+.slab{position:absolute;inset:-6px;border-radius:14px;background:#120a2e;border:2px solid #c9a13b55;transform:translateZ(calc(var(--tw)*-.05));box-shadow:0 0 60px 16px #000b;pointer-events:none}
+.rune{position:absolute;width:calc(var(--tw)*.07);aspect-ratio:1;animation:glow 3s infinite alternate;pointer-events:none}
+@keyframes glow{from{opacity:.4}to{opacity:1;filter:drop-shadow(0 0 6px #7ff)}}
+/* 서 있는 소품: 테이블 면에서 위로 세우고 화면을 향하게 역회전 */
+.stand{position:absolute;width:0;height:0;transform-style:preserve-3d;pointer-events:none}
+.stand svg{position:absolute;bottom:0;left:calc(var(--w)/-2);width:var(--w);transform-origin:50% 100%;transform:rotateZ(-45deg) rotateX(-60deg)}
 .flame{animation:flick .5s infinite alternate;transform-origin:50% 100%}
 @keyframes flick{to{transform:scale(.85,1.1)}}
-@keyframes glow{to{filter:drop-shadow(0 0 8px #7ff)}}
-/* 카드 */
-.cards{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);display:flex;justify-content:center;gap:clamp(8px,3vw,28px)}
-.slot{display:flex;flex-direction:column;align-items:center;gap:6px}
-.label{font-size:13px;color:#f0d27a;background:#0b0a2499;padding:2px 10px;border-radius:10px}
-.card{width:clamp(78px,24vw,140px);aspect-ratio:2/3;perspective:700px;cursor:pointer;transition:transform .25s,filter .25s}
-@media (hover:hover){.card:not(.flip):hover{transform:translateY(-14px);filter:drop-shadow(0 0 14px #f0d27a)}}
-.inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s}
+/* 카드: 테이블 면에 평평하게 놓임 */
+.cards{position:absolute;left:9%;right:9%;top:50%;transform:translateY(-50%);display:flex;justify-content:space-between;transform-style:preserve-3d}
+.slot{width:28%;display:flex;flex-direction:column;align-items:center;gap:6%;transform-style:preserve-3d;cursor:pointer}
+.wrap{position:relative;width:100%;aspect-ratio:2/3;transform-style:preserve-3d}
+.sh{position:absolute;inset:6%;background:#000;filter:blur(8px);opacity:.35;transition:opacity .3s,transform .3s}
+.card{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .3s}
+@media (hover:hover){
+ .slot:hover .card:not(.flip){transform:translateZ(calc(var(--tw)*.05))}
+ .slot:hover .card:not(.flip) .face{box-shadow:0 0 14px 5px #f0d27add,0 0 34px 10px #f0d27a77}
+ .slot:hover .card:not(.flip)~.sh,.slot:hover .sh{opacity:.15;transform:translate(6%,6%)}
+}
+.card.flip{animation:pop .9s}
+@keyframes pop{0%,100%{transform:translateZ(0)}45%{transform:translateZ(calc(var(--tw)*.14))}}
+.inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.3,.7,.3,1)}
 .flip .inner{transform:rotateY(180deg)}
-.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:8px;border:3px solid #c9a13b;overflow:hidden}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:6%/4%;border:3px solid #c9a13b;overflow:hidden;transition:box-shadow .3s}
 .back{background:radial-gradient(circle,#4a2c9a,#1d1148)}
-.front{transform:rotateY(180deg);background:#f4ead0;color:#2a1a55;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 2px;text-align:center}
+.front{transform:rotateY(180deg);background:#f4ead0;color:#2a1a55;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:4% 2%;text-align:center}
 .front svg{width:80%;flex:1;min-height:0}
-.front b{font-size:clamp(10px,2.6vw,14px)}.front small{font-size:clamp(8px,2vw,10px);color:#6a5a8a}
-.card.flip{cursor:default}
+.front b{font-size:calc(var(--tw)*.026)}.front small{font-size:calc(var(--tw)*.018);color:#6a5a8a}
+.label{font-size:calc(var(--tw)*.03);color:#f0d27a;white-space:nowrap;text-shadow:0 0 6px #000}
 /* 설명 */
 #info{width:min(100%,640px);min-height:130px;margin-top:8px;background:#120d33cc;border:1px solid #c9a13b88;border-radius:12px;padding:14px 16px;line-height:1.7}
 #info p{margin-bottom:8px}#info p:last-child{margin:0}
@@ -51,16 +58,21 @@ button:hover{background:#2e2266}
 <div class="bar"><button id="again">다시 뽑기</button><button id="snd">소리: 꺼짐</button></div>
 
 <div class="stage">
- <div class="table"></div>
- <svg class="deco candle l" style="position:absolute" viewBox="0 0 44 60"><rect x="14" y="26" width="16" height="32" fill="#efe3c0"/><path class="flame" d="M22 4C30 14 30 24 22 26 14 24 14 14 22 4Z" fill="#ffb347"/></svg>
- <svg class="deco candle r" style="position:absolute" viewBox="0 0 44 60"><rect x="14" y="26" width="16" height="32" fill="#efe3c0"/><path class="flame" d="M22 4C30 14 30 24 22 26 14 24 14 14 22 4Z" fill="#ffb347"/></svg>
- <svg class="deco orb" style="position:absolute" viewBox="0 0 50 64"><path d="M10 62h30l-6-14H16z" fill="#c9a13b"/><circle cx="25" cy="28" r="22" fill="#8fd8ff88" stroke="#bff" stroke-width="2"/><circle cx="18" cy="20" r="5" fill="#fff8"/></svg>
- <svg class="deco rune l" style="position:absolute" viewBox="0 0 40 40"><path d="M12 4v32M12 8l16 12-16 12" stroke="#7ff" stroke-width="3" fill="none"/></svg>
- <svg class="deco rune r" style="position:absolute" viewBox="0 0 40 40"><path d="M8 4l24 32M32 4L8 36M20 4v32" stroke="#7ff" stroke-width="3" fill="none"/></svg>
- <div class="cards" id="cards"></div>
+ <div class="table">
+  <div class="slab"></div>
+  <svg class="rune" style="left:46%;top:4%" viewBox="0 0 40 40"><path d="M12 4v32M12 8l16 12-16 12" stroke="#7ff" stroke-width="3" fill="none"/></svg>
+  <svg class="rune" style="left:46%;bottom:4%" viewBox="0 0 40 40"><path d="M8 4l24 32M32 4L8 36M20 4v32" stroke="#7ff" stroke-width="3" fill="none"/></svg>
+  <svg class="rune" style="left:4%;top:46%" viewBox="0 0 40 40"><path d="M20 4l14 16-14 16L6 20zM20 14v12" stroke="#7ff" stroke-width="3" fill="none"/></svg>
+  <svg class="rune" style="right:4%;top:46%" viewBox="0 0 40 40"><path d="M10 4v32M10 6l18 10M10 18l18 10" stroke="#7ff" stroke-width="3" fill="none"/></svg>
+  <!-- 촛불 2개 (화면 좌·우 모서리), 수정구 (뒤쪽 모서리) -->
+  <div class="stand" style="left:7%;top:93%;--w:calc(var(--tw)*.07)"><svg viewBox="0 0 44 60"><rect x="14" y="26" width="16" height="32" fill="#efe3c0"/><path class="flame" d="M22 4C30 14 30 24 22 26 14 24 14 14 22 4Z" fill="#ffb347"/></svg></div>
+  <div class="stand" style="left:93%;top:7%;--w:calc(var(--tw)*.07)"><svg viewBox="0 0 44 60"><rect x="14" y="26" width="16" height="32" fill="#efe3c0"/><path class="flame" d="M22 4C30 14 30 24 22 26 14 24 14 14 22 4Z" fill="#ffb347"/></svg></div>
+  <div class="stand" style="left:8%;top:8%;--w:calc(var(--tw)*.1)"><svg viewBox="0 0 50 64"><path d="M10 62h30l-6-14H16z" fill="#c9a13b"/><circle cx="25" cy="28" r="22" fill="#8fd8ff88" stroke="#bff" stroke-width="2"/><circle cx="18" cy="20" r="5" fill="#fff8"/></svg></div>
+  <div class="cards" id="cards"></div>
+ </div>
 </div>
 
-<div id="info"><p class="hint">카드를 눌러 과거 · 현재 · 미래를 뒤집어 보세요. (재미로 보는 운세입니다)</p></div>
+<div id="info"><p class="hint">카드를 누르거나 키보드 1 · 2 · 3 을 눌러 과거 · 현재 · 미래를 뒤집어 보세요. (재미로 보는 운세입니다)</p></div>
 
 <script>
 // 카드: [한글, 영문, 그림(svg 내부), 과거, 현재, 미래]
@@ -98,17 +110,22 @@ function deal(){
   pick=[];
   for(let i=0;i<3;i++)pick.push(idx.splice(Math.floor(Math.random()*idx.length),1)[0]);
   shown=[false,false,false];
-  $('cards').innerHTML=pick.map((n,i)=>{const c=D[n];return `<div class="slot"><div class="card" data-i="${i}"><div class="inner"><div class="face back"><svg viewBox="0 0 100 150" width="100%" height="100%"><rect x="8" y="8" width="84" height="134" fill="none" stroke="${G}" stroke-width="2"/><circle cx="50" cy="75" r="26" fill="none" stroke="${G}" stroke-width="2"/><path d="M50 40l7 28 28 7-28 7-7 28-7-28-28-7 28-7z" fill="${G}"/></svg></div><div class="face front"><svg viewBox="0 0 100 100">${c[2]}</svg><b>${c[0]}</b><small>${c[1]}</small></div></div></div><span class="label">${POS[i]}</span></div>`}).join('');
-  $('info').innerHTML='<p class="hint">카드를 눌러 과거 · 현재 · 미래를 뒤집어 보세요. (재미로 보는 운세입니다)</p>';
+  $('cards').innerHTML=pick.map((n,i)=>{const c=D[n];return `<div class="slot" data-i="${i}"><div class="wrap"><div class="sh"></div><div class="card"><div class="inner"><div class="face back"><svg viewBox="0 0 100 150" width="100%" height="100%"><rect x="8" y="8" width="84" height="134" fill="none" stroke="${G}" stroke-width="2"/><circle cx="50" cy="75" r="26" fill="none" stroke="${G}" stroke-width="2"/><path d="M50 40l7 28 28 7-28 7-7 28-7-28-28-7 28-7z" fill="${G}"/></svg></div><div class="face front"><svg viewBox="0 0 100 100">${c[2]}</svg><b>${c[0]}</b><small>${c[1]}</small></div></div></div></div><span class="label">${POS[i]}</span></div>`}).join('');
+  $('info').innerHTML='<p class="hint">카드를 누르거나 키보드 1 · 2 · 3 을 눌러 과거 · 현재 · 미래를 뒤집어 보세요. (재미로 보는 운세입니다)</p>';
 }
 function render(){
   $('info').innerHTML=shown.map((s,i)=>s?`<p><b>${D[pick[i]][0]} · ${POS[i]}</b><br>${D[pick[i]][3+i]}</p>`:'').join('');
 }
-$('cards').onclick=e=>{
-  const c=e.target.closest('.card');if(!c)return;
-  const i=+c.dataset.i;if(shown[i])return;
-  shown[i]=true;c.classList.add('flip');render();sfx();
-};
+function flip(i){
+  if(shown[i])return;
+  shown[i]=true;document.querySelectorAll('.card')[i].classList.add('flip');render();sfx();
+}
+$('cards').onclick=e=>{const s=e.target.closest('.slot');if(s)flip(+s.dataset.i)};
+// 키보드 1·2·3 (윗줄/숫자패드 모두 e.key가 '1'~'3') = 과거·현재·미래 카드 뒤집기
+addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return;
+  if('123'.includes(e.key)&&e.key.length===1)flip(+e.key-1);
+});
 $('again').onclick=deal;
 
 // 소리 (Web Audio, 사용자가 켜기 전에는 생성하지 않음)
