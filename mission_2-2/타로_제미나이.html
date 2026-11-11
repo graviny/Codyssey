@@ -229,10 +229,72 @@
       grid-template-columns: repeat(3, 1fr);
       gap: clamp(10px, 3.5vw, 34px);
       width: 100%;
-      max-width: 600px;
+      max-width: 420px;
       z-index: 5;
       transform-style: preserve-3d;
       margin-top: 12px;
+    }
+
+    /* 부채꼴로 펼쳐진 카드 더미 (22장, 2줄) */
+    .fan {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(2px, 1vw, 8px);
+      width: 100%;
+      margin-top: 22px;
+      z-index: 6;
+    }
+    .fan-row { display: flex; justify-content: center; }
+    .pick-card {
+      --w: clamp(34px, 10.5vw, 66px);
+      position: relative;
+      width: var(--w);
+      aspect-ratio: 2 / 3.15;
+      margin-left: calc(var(--w) * -0.38);
+      padding: 0;
+      border: 2px solid var(--gold);
+      border-radius: 7px;
+      background: #0f0822;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+      transform: translateY(var(--dy)) rotate(var(--rot));
+      transition: transform 0.25s ease, filter 0.25s ease, opacity 0.3s ease;
+      animation: deal 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+      animation-delay: calc(var(--i) * 35ms);
+    }
+    .fan-row .pick-card:first-child { margin-left: 0; }
+    .pick-card svg { width: 100%; height: 100%; display: block; }
+    .pick-card:hover:not(:disabled),
+    .pick-card:focus-visible {
+      transform: translateY(calc(var(--dy) - 14px)) rotate(var(--rot)) scale(1.08);
+      filter: drop-shadow(0 8px 12px rgba(255, 215, 110, 0.7));
+      z-index: 3;
+      outline: none;
+    }
+    .pick-card.taken { visibility: hidden; }
+    .fan.done .pick-card:not(.taken) { opacity: 0.35; cursor: default; }
+    @keyframes deal {
+      from { transform: translate(0, -120px) rotate(0) scale(0.6); opacity: 0; }
+    }
+
+    /* 빈 슬롯과 카드가 놓이는 연출 */
+    .card-container.empty {
+      cursor: default;
+      border: 2px dashed rgba(232, 196, 104, 0.5);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: var(--gold-dim);
+      font-size: 1.4rem;
+    }
+    .card-container.drop { animation: drop 0.45s ease-out; }
+    @keyframes drop {
+      from { transform: translateY(50px) scale(0.8); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pick-card, .card-container.drop { animation: none; }
     }
 
     .card-slot {
@@ -259,7 +321,7 @@
     /* 3D 카드 컨테이너 */
     .card-container {
       width: 100%;
-      max-width: 168px;
+      max-width: 116px;
       aspect-ratio: 2 / 3.15;
       perspective: 900px;
       cursor: pointer;
@@ -269,7 +331,7 @@
 
     /* 마우스 올렸을 때 떠오르고 금빛 번짐 */
     @media (hover: hover) {
-      .card-container:hover:not(.flipped) {
+      .card-container:hover:not(.flipped):not(.empty) {
         transform: translateY(-16px) translateZ(22px) scale(1.03);
         filter: drop-shadow(0 14px 22px rgba(255, 215, 110, 0.65));
       }
@@ -535,7 +597,7 @@
   <header>
     <div class="title-group">
       <h1>✦ 등각 타로 한 판</h1>
-      <p>과거 · 현재 · 미래의 카드 3장을 뒤집어 오늘의 흐름을 가볍게 읽어보세요.</p>
+      <p>펼쳐진 카드 22장 중 3장을 직접 골라 과거 · 현재 · 미래의 흐름을 읽어보세요.</p>
     </div>
     <div class="controls">
       <button id="soundBtn" class="btn" type="button" aria-pressed="false">
@@ -600,28 +662,26 @@
           <path d="M8 6 L24 26 M24 6 L8 26 M16 3 L16 29" stroke="#ffe699" stroke-width="2" stroke-linecap="round" fill="none"/>
         </svg>
 
-        <!-- 카드 3장 배치 영역 -->
-        <div class="cards-row" id="cardsRow">
-          <!-- JS로 과거·현재·미래 카드 3장 렌더링 -->
-        </div>
+        <!-- 고른 카드가 놓이는 자리 3칸 -->
+        <div class="cards-row" id="cardsRow"></div>
+
+        <!-- 부채꼴로 펼쳐진 카드 더미 -->
+        <div class="fan" id="fan" role="group" aria-label="카드 더미"></div>
       </div>
     </div>
 
     <div class="guide-banner" id="guideBanner">
-      카드를 차례대로 눌러 과거 · 현재 · 미래의 운세를 확인해 보세요.
+      카드 더미에서 한 장을 골라 '과거' 자리에 놓아 보세요.
     </div>
 
     <!-- 화면 아래 설명 상자 -->
     <section class="reading-box" aria-live="polite">
       <div class="reading-header">
         <h2>✧ 오늘의 타로 해석</h2>
-        <span class="reading-status" id="readingStatus">뒤집힌 카드: 0 / 3</span>
+        <span class="reading-status" id="readingStatus">고른 카드: 0 / 3</span>
       </div>
       <div id="readingContent">
-        <div class="reading-empty">
-          아직 뒤집힌 카드가 없습니다.<br/>
-          테이블 위의 <strong>과거 · 현재 · 미래</strong> 카드를 눌러 뒤집어 보세요.
-        </div>
+        <div class="reading-empty"></div>
       </div>
     </section>
   </main>
@@ -1051,83 +1111,97 @@
       });
     }
 
-    // 22장 중 겹치지 않게 무작위 3장 뽑기 (Fisher-Yates 셔플)
-    function pickThreeUniqueCards() {
+    // 22장 전체를 섞기 (Fisher-Yates 셔플)
+    function shuffleDeck() {
       const pool = [...MAJOR_ARCANA];
       for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
       }
-      return pool.slice(0, 3);
+      return pool;
     }
 
-    // 카드 테이블 렌더링
-    function renderCards() {
+    const fanEl = document.getElementById("fan");
+
+    // 과거·현재·미래 빈 자리 3칸
+    function renderSlots() {
       const row = document.getElementById("cardsRow");
       row.innerHTML = "";
-
-      POSITIONS.forEach((pos, idx) => {
-        const card = selectedCards[idx];
+      POSITIONS.forEach((pos) => {
         const slot = document.createElement("div");
         slot.className = "card-slot";
-
-        const label = document.createElement("div");
-        label.className = "slot-label";
-        label.textContent = pos.label;
-
-        const container = document.createElement("div");
-        container.className = "card-container" + (flippedState[idx] ? " flipped" : "");
-        container.setAttribute("role", "button");
-        container.setAttribute("tabindex", "0");
-        container.setAttribute("aria-label", `${pos.label} 카드 뒤집기`);
-
-        container.innerHTML = `
-          <div class="card-inner">
-            <div class="card-face card-back">
-              ${getCardBackSVG()}
-            </div>
-            <div class="card-face card-front">
-              <div class="card-num">${card.roman}</div>
-              <div class="card-art">${getCardArtSVG(card.art)}</div>
-              <div>
-                <div class="card-title-kr">${card.kr}</div>
-                <div class="card-title-en">${card.en}</div>
-              </div>
-            </div>
-          </div>
-        `;
-
-        container.addEventListener("click", () => handleCardClick(idx));
-        container.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleCardClick(idx);
-          }
-        });
-
-        slot.appendChild(label);
-        slot.appendChild(container);
+        slot.innerHTML = `<div class="slot-label">${pos.label}</div><div class="card-container empty">?</div>`;
         row.appendChild(slot);
       });
     }
 
-    // 카드 클릭 처리 (이미 뒤집힌 카드는 다시 눌러도 바뀌지 않음)
-    function handleCardClick(idx) {
-      if (flippedState[idx]) {
-        lastFocusedIndex = idx;
-        renderReadings();
-        return;
-      }
+    // 고른 카드를 자리에 놓고 뒤집기
+    function fillSlot(idx) {
+      const card = selectedCards[idx];
+      const holder = document.querySelectorAll(".card-container")[idx];
+      holder.className = "card-container drop";
+      holder.setAttribute("aria-label", `${POSITIONS[idx].label}: ${card.kr}`);
+      holder.innerHTML = `
+        <div class="card-inner">
+          <div class="card-face card-back">${getCardBackSVG()}</div>
+          <div class="card-face card-front">
+            <div class="card-num">${card.roman}</div>
+            <div class="card-art">${getCardArtSVG(card.art)}</div>
+            <div>
+              <div class="card-title-kr">${card.kr}</div>
+              <div class="card-title-en">${card.en}</div>
+            </div>
+          </div>
+        </div>`;
+      holder.offsetWidth; // 뒷면 상태를 먼저 그린 뒤 뒤집어야 애니메이션이 돈다
+      holder.classList.add("flipped");
+    }
 
+    // 22장을 11장씩 2줄 부채꼴로 펼치기
+    function renderFan() {
+      fanEl.className = "fan";
+      fanEl.innerHTML = "";
+      for (let r = 0; r < 2; r++) {
+        const row = document.createElement("div");
+        row.className = "fan-row";
+        for (let j = 0; j < 11; j++) {
+          const i = r * 11 + j;
+          const k = j - 5;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "pick-card";
+          btn.style.cssText = `--i:${i};--rot:${k * 3}deg;--dy:${k * k * 0.7}px`;
+          btn.setAttribute("aria-label", `카드 ${i + 1}번 고르기`);
+          btn.innerHTML = getCardBackSVG();
+          btn.addEventListener("click", () => pickCard(i, btn));
+          row.appendChild(btn);
+        }
+        fanEl.appendChild(row);
+      }
+    }
+
+    // 카드 더미에서 한 장 고르기: 과거 → 현재 → 미래 순서로 자리에 놓인다
+    function pickCard(i, btn) {
+      const idx = flippedState.filter(Boolean).length;
+      if (idx >= 3 || btn.disabled) return;
+
+      selectedCards[idx] = deck[i];
       flippedState[idx] = true;
       lastFocusedIndex = idx;
-      playFlipSound(idx);
+      btn.classList.add("taken");
+      btn.disabled = true;
 
-      const containers = document.querySelectorAll(".card-container");
-      if (containers[idx]) {
-        containers[idx].classList.add("flipped");
+      const buttons = [...fanEl.querySelectorAll(".pick-card")];
+      const next = buttons.find((b) => !b.disabled);
+      if (idx === 2) {
+        fanEl.classList.add("done");
+        buttons.forEach((b) => (b.disabled = true));
+      } else if (next) {
+        next.focus(); // 키보드 사용자가 포커스를 잃지 않게
       }
 
+      fillSlot(idx);
+      playFlipSound(idx);
       updateGuideBanner();
       renderReadings();
     }
@@ -1135,13 +1209,9 @@
     function updateGuideBanner() {
       const count = flippedState.filter(Boolean).length;
       const banner = document.getElementById("guideBanner");
-      if (count === 0) {
-        banner.textContent = "카드를 차례대로 눌러 과거 · 현재 · 미래의 운세를 확인해 보세요.";
-      } else if (count < 3) {
-        banner.textContent = `카드 ${count}장을 확인했습니다. 남은 카드도 눌러 뒤집어 보세요.`;
-      } else {
-        banner.textContent = "과거 · 현재 · 미래 3장의 카드가 모두 공개되었습니다!";
-      }
+      banner.textContent = count < 3
+        ? `카드 더미에서 한 장을 골라 '${POSITIONS[count].label}' 자리에 놓아 보세요.`
+        : "과거 · 현재 · 미래 3장의 카드를 모두 골랐습니다!";
     }
 
     // 설명 상자 업데이트
@@ -1149,13 +1219,13 @@
       const count = flippedState.filter(Boolean).length;
       const statusEl = document.getElementById("readingStatus");
       const contentEl = document.getElementById("readingContent");
-      statusEl.textContent = `뒤집힌 카드: ${count} / 3`;
+      statusEl.textContent = `고른 카드: ${count} / 3`;
 
       if (count === 0) {
         contentEl.innerHTML = `
           <div class="reading-empty">
-            아직 뒤집힌 카드가 없습니다.<br/>
-            테이블 위의 <strong>과거 · 현재 · 미래</strong> 카드를 눌러 뒤집어 보세요.
+            아직 고른 카드가 없습니다.<br/>
+            테이블에 펼쳐진 카드 중 <strong>마음이 끌리는 3장</strong>을 골라 보세요.
           </div>
         `;
         return;
@@ -1184,9 +1254,9 @@
           item.innerHTML = `
             <div class="reading-badge-row">
               <span class="pos-badge">${pos.label}</span>
-              <span class="reading-card-name">아직 뒤집히지 않음</span>
+              <span class="reading-card-name">아직 고르지 않음</span>
             </div>
-            <p class="reading-desc">테이블에서 '${pos.label}' 카드를 누르면 이 위치에 맞는 해석이 표시됩니다.</p>
+            <p class="reading-desc">'${pos.label}' 자리에 카드를 고르면 이 위치에 맞는 해석이 표시됩니다.</p>
           `;
         }
 
@@ -1201,19 +1271,13 @@
     function resetSpread() {
       playResetSound();
       flippedState = [false, false, false];
+      selectedCards = [];
       lastFocusedIndex = -1;
-
-      const containers = document.querySelectorAll(".card-container");
-      containers.forEach((c) => c.classList.remove("flipped"));
-
+      deck = shuffleDeck();
+      renderSlots();
+      renderFan();
       updateGuideBanner();
       renderReadings();
-
-      // 카드가 뒷면으로 돌아가는 애니메이션 후 새 카드 3장 배정
-      setTimeout(() => {
-        selectedCards = pickThreeUniqueCards();
-        renderCards();
-      }, 280);
     }
 
     // 소리 켜기 / 끄기 토글
@@ -1241,8 +1305,9 @@
     document.getElementById("resetBtn").addEventListener("click", resetSpread);
     document.getElementById("soundBtn").addEventListener("click", toggleSound);
 
-    selectedCards = pickThreeUniqueCards();
-    renderCards();
+    let deck = shuffleDeck();
+    renderSlots();
+    renderFan();
     renderReadings();
   </script>
 </body>
