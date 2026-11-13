@@ -421,6 +421,44 @@
       object-fit: cover;
       border-radius: 4px;
       display: block;
+      transition: transform 0.3s ease;
+    }
+
+    /* 역방향 카드 그림 뒤집기 (180도 회전) */
+    .card-container.reversed .card-art img {
+      transform: rotate(180deg);
+    }
+
+    /* 정방향 / 역방향 배지 스타일 */
+    .dir-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid;
+    }
+
+    .dir-badge.upright {
+      background: rgba(232, 196, 104, 0.18);
+      color: var(--gold-bright);
+      border-color: rgba(232, 196, 104, 0.6);
+    }
+
+    .dir-badge.reversed {
+      background: rgba(190, 120, 255, 0.2);
+      color: #e2c2ff;
+      border-color: rgba(190, 120, 255, 0.65);
+    }
+
+    .reading-keywords {
+      font-size: 0.78rem;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .reading-item.is-reversed .reading-keywords {
+      color: #d6adff;
     }
 
     .card-title-kr {
@@ -693,139 +731,249 @@
   </footer>
 
   <script>
-    // 메이저 아르카나 22장 데이터 (한글·영문 이름, 로마 숫자, 아이콘 타입, 과거/현재/미래 해석)
+    // 메이저 아르카나 22장 데이터 (한글·영문 이름, 로마 숫자, 정방향·역방향 핵심 키워드 및 과거/현재/미래 해석)
     const MAJOR_ARCANA = [
       {
         id: 0, roman: "0", kr: "바보", en: "The Fool", art: "fool",
+        uprightKeywords: "새로운 시작 · 순수함 · 자유로운 모험 · 무한한 가능성",
+        reversedKeywords: "경솔함 · 준비 부족 · 망설임 · 현실 감각 부족",
         past: "익숙한 틀에서 벗어나 순수한 호기심으로 새로운 걸음을 내디뎠던 시기입니다.",
         present: "계획에 너무 얽매이지 말고 가벼운 마음으로 새로운 시도를 해보면 좋은 날입니다.",
-        future: "예상치 못한 뜻밖의 기회나 설레는 출발이 곧 찾아올 것입니다."
+        future: "예상치 못한 뜻밖의 기회나 설레는 출발이 곧 찾아올 것입니다.",
+        revPast: "충분한 준비 없이 성급하게 뛰어들었거나, 반대로 두려움에 기회를 망설였던 시기입니다.",
+        revPresent: "무작정 행동하기보다 현실적인 여건과 빠뜨린 세부 사항을 한 번 더 점검해야 할 때입니다.",
+        revFuture: "충동적인 결정만 주의한다면 불필요한 시행착오를 줄이고 안정적으로 나아갈 수 있습니다."
       },
       {
         id: 1, roman: "I", kr: "마법사", en: "The Magician", art: "magician",
+        uprightKeywords: "창조력 · 뛰어난 재능 · 의지력 · 잠재력 발휘",
+        reversedKeywords: "의지 부족 · 재능 낭비 · 준비 미흡 · 소통의 혼선",
         past: "자신이 가진 재능과 도구를 활용해 문제를 영리하게 해결해 왔습니다.",
         present: "아이디어와 실행력이 모두 갖춰져 있으니 자신 있게 주도권을 잡아보세요.",
-        future: "준비해 온 능력을 발휘해 원하는 결과를 직접 만들어내게 됩니다."
+        future: "준비해 온 능력을 발휘해 원하는 결과를 직접 만들어내게 됩니다.",
+        revPast: "좋은 능력을 갖추고도 확신이 부족해 에너지를 한곳에 모으지 못했던 때가 있었습니다.",
+        revPresent: "겉모습이나 말만 앞세우기보다 부족한 실무 준비를 차근차근 채워 넣어야 하는 날입니다.",
+        revFuture: "욕심을 덜고 기본기에 충실하면 막혀 있던 소통과 흐름이 다시 매끄러워질 것입니다."
       },
       {
         id: 2, roman: "II", kr: "여사제", en: "The High Priestess", art: "priestess",
+        uprightKeywords: "직관력 · 깊은 통찰 · 내면의 지혜 · 신중함",
+        reversedKeywords: "지나친 예민함 · 표면적 판단 · 직관의 혼란 · 감정적 거리감",
         past: "감정에 휩쓸리기보다 조용히 상황을 관찰하며 내면의 지혜를 쌓아왔습니다.",
         present: "성급히 행동하기보다 직관을 믿고 한 걸음 물러서서 살펴보는 것이 유리합니다.",
-        future: "감춰져 있던 해답이 드러나고 마음속 확신을 얻게 될 것입니다."
+        future: "감춰져 있던 해답이 드러나고 마음속 확신을 얻게 될 것입니다.",
+        revPast: "속마음을 지나치게 감추거나 겉으로 드러난 단편적인 모습만 보고 오해했던 적이 있습니다.",
+        revPresent: "혼자만의 생각이나 지나친 의심에 갇히지 말고 주변과 가볍게 대화를 나누어 보세요.",
+        revFuture: "감정적인 예민함을 내려놓으면 오히려 숨겨진 문제의 본질을 편안하게 마주하게 됩니다."
       },
       {
         id: 3, roman: "III", kr: "여황제", en: "The Empress", art: "empress",
+        uprightKeywords: "풍요로움 · 포용력 · 결실 · 정서적 안락함",
+        reversedKeywords: "나태함 · 과도한 집착 · 에너지 소모 · 내면의 공허함",
         past: "주변의 따뜻한 배려와 풍요로운 환경 속에서 안정감을 키워왔습니다.",
         present: "마음의 여유를 즐기고 나 자신과 주변 사람들을 다정하게 챙기기에 좋은 날입니다.",
-        future: "정성 들여 가꿔온 일에서 풍성하고 만족스러운 결실을 맺게 됩니다."
+        future: "정성 들여 가꿔온 일에서 풍성하고 만족스러운 결실을 맺게 됩니다.",
+        revPast: "편안함에 안주해 흐름이 느슨해졌거나, 타인의 시선과 애정에 지나치게 신경 썼던 시기입니다.",
+        revPresent: "감정이나 비용을 과하게 쓰기보다 생활의 리듬과 절제를 되찾는 것이 우선입니다.",
+        revFuture: "의존적인 태도를 줄이고 스스로를 먼저 돌볼 때 진정한 여유와 만족이 찾아옵니다."
       },
       {
         id: 4, roman: "IV", kr: "황제", en: "The Emperor", art: "emperor",
+        uprightKeywords: "리더십 · 책임감 · 탄탄한 기반 · 질서와 안정",
+        reversedKeywords: "독단적 태도 · 융통성 부족 · 과도한 통제 · 부담감",
         past: "확고한 원칙과 책임감으로 흔들림 없이 기반을 다져왔습니다.",
         present: "규칙적인 생활과 체계적인 계획이 오늘의 목표를 이루는 든든한 힘이 됩니다.",
-        future: "안정적인 위치에 오르거나 주변의 신뢰를 받으며 중심을 잡게 됩니다."
+        future: "안정적인 위치에 오르거나 주변의 신뢰를 받으며 중심을 잡게 됩니다.",
+        revPast: "내 방식만을 고집해 유연함이 부족했거나, 무거운 책임감에 짓눌려 피로했던 시기입니다.",
+        revPresent: "모든 것을 완벽히 통제하려 하기보다 주변의 의견을 부드럽게 수용해 보세요.",
+        revFuture: "고집을 조금만 내려놓고 유연하게 대처하면 갈등 없이 든든한 협력과 안정을 얻게 됩니다."
       },
       {
         id: 5, roman: "V", kr: "교황", en: "The Hierophant", art: "hierophant",
+        uprightKeywords: "전통과 규범 · 멘토의 조언 · 신뢰 · 배움과 협력",
+        reversedKeywords: "형식주의 · 고정관념 탈피 · 가치관 충돌 · 답답한 규칙",
         past: "검증된 방식이나 믿을 만한 조언자의 가르침을 따르며 성장해 왔습니다.",
         present: "혼자 고민하기보다 경험 많은 사람이나 선배의 조언을 구하면 실마리가 풀립니다.",
-        future: "좋은 멘토를 만나거나 신뢰할 수 있는 집단에서 도움을 얻게 됩니다."
+        future: "좋은 멘토를 만나거나 신뢰할 수 있는 집단에서 도움을 얻게 됩니다.",
+        revPast: "기존의 관습이나 타인의 기준에 맞추느라 정작 내 목소리를 내기 어려웠던 때가 있었습니다.",
+        revPresent: "낡은 고정관념이나 형식적인 절차에 얽매이지 말고 새로운 시각으로 접근해 보세요.",
+        revFuture: "남들의 시선에서 벗어나 나만의 주관을 세우면 훨씬 자유롭고 실용적인 해법을 찾게 됩니다."
       },
       {
         id: 6, roman: "VI", kr: "연인", en: "The Lovers", art: "lovers",
+        uprightKeywords: "조화로운 관계 · 깊은 유대 · 가치관 일치 · 중요한 선택",
+        reversedKeywords: "선택의 기로 · 의견 불일치 · 흔들리는 마음 · 소통 부족",
         past: "마음이 통하는 사람들과의 교류나 중요한 선택이 지금의 나를 만들었습니다.",
         present: "대화와 협력이 잘 풀리는 날이니 소중한 사람과 솔직한 마음을 나눠보세요.",
-        future: "가치관이 잘 맞는 파트너십이나 기분 좋은 인연이 이어질 것입니다."
+        future: "가치관이 잘 맞는 파트너십이나 기분 좋은 인연이 이어질 것입니다.",
+        revPast: "중요한 결정을 앞두고 마음이 흔들렸거나, 소통이 어긋나 아쉬움이 남았던 시기입니다.",
+        revPresent: "순간의 분위기나 유혹에 휩쓸리지 말고 내가 진짜 원하는 가치가 무엇인지 살펴보세요.",
+        revFuture: "서두르지 않고 솔직한 대화로 오해를 풀어가면 더 성숙하고 단단한 관계와 선택에 이릅니다."
       },
       {
         id: 7, roman: "VII", kr: "전차", en: "The Chariot", art: "chariot",
+        uprightKeywords: "강한 추진력 · 돌파구 · 목표 달성 · 승리",
+        reversedKeywords: "무리한 질주 · 방향 상실 · 조급함 · 속도 조절 필요",
         past: "망설임을 이겨내고 강한 추진력으로 장애물을 돌파해 왔습니다.",
         present: "목표를 향해 집중력을 발휘하면 빠르게 성과를 낼 수 있는 역동적인 하루입니다.",
-        future: "경쟁이나 어려운 과제를 거뜬히 넘어 원하는 고지에 도달하게 됩니다."
+        future: "경쟁이나 어려운 과제를 거뜬히 넘어 원하는 고지에 도달하게 됩니다.",
+        revPast: "마음만 앞서 무리하게 속도를 내다가 방향이 흔들리거나 에너지를 소진했던 적이 있습니다.",
+        revPresent: "조급하게 밀어붙이기보다 잠시 브레이크를 밟고 우선순위와 방향을 재점검할 때입니다.",
+        revFuture: "감정적인 폭주를 다스리고 호흡을 가다듬으면 다시 흔들림 없이 목표에 도달할 수 있습니다."
       },
       {
         id: 8, roman: "VIII", kr: "힘", en: "Strength", art: "strength",
+        uprightKeywords: "내면의 용기 · 인내심 · 부드러운 포용 · 자제력",
+        reversedKeywords: "자신감 저하 · 무기력 · 감정 기복 · 인내심 한계",
         past: "강압이 아닌 인내심과 부드러운 포용력으로 어려움을 다스려 왔습니다.",
         present: "조급해하지 않고 차분한 용기로 다가가면 까다로운 일도 자연스레 풀립니다.",
-        future: "내면의 단단한 힘으로 끝까지 흐름을 지켜내며 원하는 바를 이룹니다."
+        future: "내면의 단단한 힘으로 끝까지 흐름을 지켜내며 원하는 바를 이룹니다.",
+        revPast: "스스로를 믿지 못해 위축되었거나, 참아왔던 감정이 지쳐 흔들렸던 순간이 있었습니다.",
+        revPresent: "모든 짐을 혼자 견디려 애쓰지 말고 지친 마음을 먼저 다독이며 휴식을 주세요.",
+        revFuture: "자책과 조바심을 내려놓는 순간 본래 가지고 있던 단단한 회복력이 다시 살아날 것입니다."
       },
       {
         id: 9, roman: "IX", kr: "은둔자", en: "The Hermit", art: "hermit",
+        uprightKeywords: "깊은 성찰 · 내면 탐구 · 신중함 · 지혜로운 해답",
+        reversedKeywords: "지나친 고립 · 생각의 과잉 · 외로움 · 현실 회피",
         past: "혼자만의 시간을 통해 깊이 생각하고 진짜 중요한 가치를 찾아왔습니다.",
         present: "소란스러운 외부 일정보다 잠시 조용히 생각을 정리하는 시간이 큰 도움이 됩니다.",
-        future: "깊은 성찰 끝에 흔들리지 않는 나만의 해답과 방향을 찾게 됩니다."
+        future: "깊은 성찰 끝에 흔들리지 않는 나만의 해답과 방향을 찾게 됩니다.",
+        revPast: "고민이 너무 깊어져 스스로를 고립시키거나 세상과 거리를 두었던 시기가 있었습니다.",
+        revPresent: "끝없는 생각의 미로에 갇히기보다 밖으로 나와 가벼운 산책이나 대화를 나눠보세요.",
+        revFuture: "마음의 문을 조금만 열고 주변과 온기를 나누면 답답하던 고민이 한결 가벼워질 것입니다."
       },
       {
         id: 10, roman: "X", kr: "운명의 수레바퀴", en: "Wheel of Fortune", art: "wheel",
+        uprightKeywords: "운명적 전환점 · 행운의 흐름 · 기회 포착 · 순환",
+        reversedKeywords: "타이밍 지연 · 일시적 정체 · 예상 밖의 변수 · 인내",
         past: "예상치 못한 변화의 흐름 속에서도 유연하게 적응하며 여기까지 왔습니다.",
         present: "흐름이 새롭게 바뀌는 전환점이니 자연스럽게 기회를 받아들여 보세요.",
-        future: "막혀 있던 일이 순조롭게 돌아가며 반가운 행운의 타이밍이 찾아옵니다."
+        future: "막혀 있던 일이 순조롭게 돌아가며 반가운 행운의 타이밍이 찾아옵니다.",
+        revPast: "아쉽게 타이밍이 엇갈리거나 비슷한 상황이 반복되어 답답함을 느꼈던 적이 있습니다.",
+        revPresent: "흐름이 잠시 더디더라도 억지로 바꾸려 하기보다 차분히 때를 기다리는 지혜가 필요합니다.",
+        revFuture: "지나가는 정체기일 뿐이니 조급함을 내려놓으면 곧 수레바퀴가 다시 유리한 방향으로 돕니다."
       },
       {
         id: 11, roman: "XI", kr: "정의", en: "Justice", art: "justice",
+        uprightKeywords: "공정한 판단 · 균형과 조화 · 이성적 결정 · 정당한 보상",
+        reversedKeywords: "불균형 · 편향된 시각 · 결정 지연 · 책임 회피 주의",
         past: "치우치지 않는 균형 감각과 공정한 판단으로 선택을 내려왔습니다.",
         present: "감정보다 객관적인 사실에 바탕을 두고 결정하면 후회 없는 하루가 됩니다.",
-        future: "그동안 기울인 노력만큼 정당하고 합리적인 보상을 받게 될 것입니다."
+        future: "그동안 기울인 노력만큼 정당하고 합리적인 보상을 받게 될 것입니다.",
+        revPast: "감정이나 선입견이 섞여 균형을 잃었거나, 노력에 비해 아쉬운 평가를 받았던 적이 있습니다.",
+        revPresent: "한쪽 입장만 보지 말고 나의 일과 삶, 혹은 관계의 저울추가 기울지 않았는지 살펴보세요.",
+        revFuture: "변명이나 미루기를 멈추고 솔직하고 공정하게 마주할 때 무너진 균형이 바로잡힐 것입니다."
       },
       {
         id: 12, roman: "XII", kr: "매달린 사람", en: "The Hanged Man", art: "hanged",
+        uprightKeywords: "관점의 전환 · 의미 있는 인내 · 멈춤 속의 깨달음 · 헌신",
+        reversedKeywords: "무의미한 희생 · 고집 · 정체된 답답함 · 관점 전환 필요",
         past: "더 큰 성장을 위해 잠시 멈춰 기다리거나 희생을 감수했던 시간이 있었습니다.",
         present: "관점을 조금만 뒤집어 보면 답답해 보이던 상황에서 새로운 지혜가 보입니다.",
-        future: "잠시의 기다림이 끝난 뒤 이전과는 전혀 다른 새로운 시야를 얻게 됩니다."
+        future: "잠시의 기다림이 끝난 뒤 이전과는 전혀 다른 새로운 시야를 얻게 됩니다.",
+        revPast: "보상 없는 희생에 지쳤거나, 안 풀리는 방식에 미련하게 매달려 시간을 보냈던 적이 있습니다.",
+        revPresent: "남을 위해 나를 지나치게 희생하기보다 지금 멈춰 있는 이유를 냉정히 돌아봐야 할 때입니다.",
+        revFuture: "억지로 버티던 마음의 짐을 내려놓는 순간 정체되어 있던 흐름이 시원하게 풀려나갑니다."
       },
       {
         id: 13, roman: "XIII", kr: "죽음", en: "Death", art: "death",
+        uprightKeywords: "과거의 정리 · 새로운 출발 · 근본적 변화 · 환골탈태",
+        reversedKeywords: "변화에 대한 저항 · 미련과 집착 · 정체 · 새 출발 지연",
         past: "오래된 습관이나 끝난 일을 정리하며 한 단계를 마무리했습니다.",
         present: "불필요한 미련을 덜어낼수록 새롭고 산뜻한 에너지가 채워지는 날입니다.",
-        future: "과거의 껍질을 벗고 완전히 새롭고 희망찬 국면이 시작될 것입니다."
+        future: "과거의 껍질을 벗고 완전히 새롭고 희망찬 국면이 시작될 것입니다.",
+        revPast: "이미 끝난 일이나 관계에 미련이 남아 변화를 받아들이기 힘들었던 시기가 있었습니다.",
+        revPresent: "익숙하다는 이유로 붙잡고 있는 오래된 습관이나 걱정을 과감히 놓아주어야 할 때입니다.",
+        revFuture: "변화에 대한 두려움을 넘어설 때 비로소 멈춰 있던 일상에 신선한 새 바람이 불어옵니다."
       },
       {
         id: 14, roman: "XIV", kr: "절제", en: "Temperance", art: "temperance",
+        uprightKeywords: "조화와 중용 · 원만한 소통 · 치유 · 평온한 균형",
+        reversedKeywords: "극단적 태도 · 조급함 · 생활 리듬 불균형 · 소통 어긋남",
         past: "서로 다른 조건들을 조화롭게 조율하며 무리 없이 균형을 맞춰왔습니다.",
         present: "과유불급을 기억하고 일과 휴식의 황금 비율을 유지하면 편안한 하루가 됩니다.",
-        future: "갈등이나 어수선함이 가라앉고 마음이 평온하게 정돈될 것입니다."
+        future: "갈등이나 어수선함이 가라앉고 마음이 평온하게 정돈될 것입니다.",
+        revPast: "한쪽으로 에너지가 쏠려 무리했거나, 감정 조절이 쉽지 않아 피로가 쌓였던 시기입니다.",
+        revPresent: "모 아니면 도 식의 극단적인 결정은 피하고, 넘치거나 부족한 부분을 다듬어 보세요.",
+        revFuture: "조급한 마음을 가라앉히고 페이스를 조절하면 어긋났던 소통과 일상이 다시 조화를 찾습니다."
       },
       {
         id: 15, roman: "XV", kr: "악마", en: "The Devil", art: "devil",
+        uprightKeywords: "강한 이끌림 · 집착과 유혹 · 과몰입 · 욕망의 직시",
+        reversedKeywords: "속박에서의 해방 · 악습 타파 · 유혹 극복 · 주도권 회복",
         past: "강한 몰입이나 쉽게 떨치기 힘든 유혹·집착에 에너지를 쏟았던 적이 있습니다.",
         present: "나도 모르게 매여 있는 습관이나 과한 욕심을 가볍게 점검해 보면 좋습니다.",
-        future: "나를 묶어두던 부담에서 벗어나 스스로 주도권을 되찾게 됩니다."
+        future: "나를 묶어두던 부담에서 벗어나 스스로 주도권을 되찾게 됩니다.",
+        revPast: "나를 답답하게 얽매던 나쁜 습관이나 부정적인 고리를 끊어내려 노력해 왔습니다.",
+        revPresent: "불필요한 집착이나 부담감에서 벗어나 마음의 자유를 되찾기에 아주 좋은 날입니다.",
+        revFuture: "오래된 굴레를 완전히 털어내고 한결 가볍고 주체적인 모습으로 나아가게 됩니다."
       },
       {
         id: 16, roman: "XVI", kr: "탑", en: "The Tower", art: "tower",
+        uprightKeywords: "급격한 변화 · 고정관념 타파 · 깨달음 · 새로운 재건",
+        reversedKeywords: "위기 모면 · 변화의 예고 · 미봉책 주의 · 점진적 수습",
         past: "갑작스러운 변화나 고정관념이 깨지는 경험을 통해 오히려 단단해졌습니다.",
         present: "예상과 다른 변수가 생기더라도 당황하지 말고 틀을 새로 짜는 기회로 삼으세요.",
-        future: "불안정했던 요소가 정리되고 더 튼튼한 토대 위에 새로 서게 됩니다."
+        future: "불안정했던 요소가 정리되고 더 튼튼한 토대 위에 새로 서게 됩니다.",
+        revPast: "큰 충격이나 위기는 아슬아슬하게 피했지만, 마음 한편에 불안감이 남아 있던 시기입니다.",
+        revPresent: "문제를 임시방편으로 덮어두기보다 흔들리는 부분을 미리 점검하고 보수하는 것이 좋습니다.",
+        revFuture: "작은 균열을 미리 살피고 유연하게 대처함으로써 큰 혼란 없이 상황을 안정시키게 됩니다."
       },
       {
         id: 17, roman: "XVII", kr: "별", en: "The Star", art: "star",
+        uprightKeywords: "희망과 영감 · 정서적 치유 · 밝은 전망 · 소원 성취",
+        reversedKeywords: "의기소침 · 비관적 생각 · 비현실적 기대 · 활력 충전 필요",
         past: "어려운 순간에도 희망과 긍정적인 기대를 잃지 않고 걸어왔습니다.",
         present: "영감과 반짝이는 아이디어가 떠오르는 날이니 소망하는 바를 그려보세요.",
-        future: "마음이 치유되고 바랐던 소식에 한 걸음 가까워지는 밝은 미래가 열립니다."
+        future: "마음이 치유되고 바랐던 소식에 한 걸음 가까워지는 밝은 미래가 열립니다.",
+        revPast: "기대가 컸던 만큼 실망감을 느꼈거나, 잠시 자신감과 의욕이 떨어졌던 시기가 있었습니다.",
+        revPresent: "너무 먼 이상만 바라보거나 비관하기보다, 지금 당장 할 수 있는 작은 기쁨을 찾아보세요.",
+        revFuture: "현실적인 목표부터 하나씩 이루어가면 잊고 있던 희망과 반짝이는 영감이 다시 차오릅니다."
       },
       {
         id: 18, roman: "XVIII", kr: "달", en: "The Moon", art: "moon",
+        uprightKeywords: "막연한 불안 · 불확실성 · 섬세한 감수성 · 신중한 탐색",
+        reversedKeywords: "불안의 해소 · 오해 풀림 · 진실 발견 · 마음의 안정",
         past: "확실하지 않은 상황 속에서도 조심스럽게 길을 탐색하며 지나왔습니다.",
         present: "막연한 걱정이나 추측에 흔들리지 말고 확인된 사실에 집중하는 것이 좋습니다.",
-        future: "안개가 걷히듯 모호했던 일들이 점차 또렷하게 밝혀질 것입니다."
+        future: "안개가 걷히듯 모호했던 일들이 점차 또렷하게 밝혀질 것입니다.",
+        revPast: "복잡하게 얽혀 있던 오해나 막연한 두려움에서 서서히 벗어나기 시작한 시기입니다.",
+        revPresent: "안개가 걷히고 숨겨져 있던 사실이나 해결책이 명확하게 드러나는 다행스러운 날입니다.",
+        revFuture: "근거 없는 걱정과 혼란이 말끔히 사라지고 마음의 평온과 확신을 되찾게 될 것입니다."
       },
       {
         id: 19, roman: "XIX", kr: "태양", en: "The Sun", art: "sun",
+        uprightKeywords: "밝은 성공 · 넘치는 활력 · 기쁨과 성취 · 긍정적 에너지",
+        reversedKeywords: "일시적 지연 · 체력 소모 · 과신 주의 · 작은 성취에 감사",
         past: "밝은 에너지와 성실함으로 주변에 긍정적인 영향을 주며 성장했습니다.",
         present: "활기가 넘치고 하는 일마다 시원하게 풀리는 기분 좋은 하루입니다.",
-        future: "보람찬 성취와 함께 웃음 지을 일이 가득한 따뜻한 시간이 찾아옵니다."
+        future: "보람찬 성취와 함께 웃음 지을 일이 가득한 따뜻한 시간이 찾아옵니다.",
+        revPast: "열정은 넘쳤으나 체력이 뒷받침되지 않았거나, 결과물이 조금 늦어져 아쉬웠던 때입니다.",
+        revPresent: "기본적인 운의 흐름은 밝으니, 지나친 자만이나 무리한 일정만 조금 조절하면 좋습니다.",
+        revFuture: "구름이 잠시 해를 가렸을 뿐, 조금만 여유를 가지면 곧 밝고 만족스러운 결실을 보게 됩니다."
       },
       {
         id: 20, roman: "XX", kr: "심판", en: "Judgement", art: "judgement",
+        uprightKeywords: "부활과 각성 · 재도약 · 기쁜 소식 · 노력의 보상",
+        reversedKeywords: "결단 지연 · 과거의 미련 · 기회 망설임 · 자기 성찰 필요",
         past: "지나온 노력과 선택들이 차곡차곡 쌓여 중요한 전환점을 준비해 왔습니다.",
         present: "잊고 있던 목표나 반가운 연락이 다시 살아나 새로운 동기를 주는 날입니다.",
-        future: "그동안의 수고가 인정받고 한 단계 도약하는 뜻깊은 결실을 맞이합니다."
+        future: "그동안의 수고가 인정받고 한 단계 도약하는 뜻깊은 결실을 맞이합니다.",
+        revPast: "중요한 결단을 내리지 못해 타이밍을 놓쳤거나, 지나간 일에 대한 아쉬움이 남았던 시기입니다.",
+        revPresent: "과거의 후회에 머무르기보다 지금 눈앞에 찾아온 재도전의 신호를 놓치지 마세요.",
+        revFuture: "스스로를 객관적으로 돌아보고 결단을 내릴 때, 미뤄졌던 보상과 새로운 기회가 열립니다."
       },
       {
         id: 21, roman: "XXI", kr: "세계", en: "The World", art: "world",
+        uprightKeywords: "완성과 성취 · 조화로운 결말 · 성공적 마무리 · 새로운 지평",
+        reversedKeywords: "마무리 지연 · 2% 부족한 완성 · 점검 필요 · 마지막 스퍼트",
         past: "하나의 긴 여정을 성실하게 완주하며 값진 경험과 완성을 이뤄냈습니다.",
         present: "진행 중인 일이 조화롭게 마무리되며 큰 만족감을 느낄 수 있는 날입니다.",
-        future: "목표하던 바를 성공적으로 달성하고 더 넓은 무대로 나아가게 됩니다."
+        future: "목표하던 바를 성공적으로 달성하고 더 넓은 무대로 나아가게 됩니다.",
+        revPast: "목표 달성 직전에 작은 마무리가 아쉬웠거나, 다음 단계로 넘어가는 것을 주저했던 때입니다.",
+        revPresent: "거의 다 완성된 일이니 마지막 디테일과 빠진 조각을 한 번 더 꼼꼼히 챙겨보세요.",
+        revFuture: "남아 있는 작은 과제만 차분히 매듭지으면 곧 온전한 완성과 만족스러운 결말에 닿게 됩니다."
       }
     ];
 
@@ -1113,9 +1261,12 @@
       });
     }
 
-    // 22장 전체를 섞기 (Fisher-Yates 셔플)
+    // 22장 전체를 섞기 (Fisher-Yates 셔플 + 정방향/역방향 무작위 부여)
     function shuffleDeck() {
-      const pool = [...MAJOR_ARCANA];
+      const pool = MAJOR_ARCANA.map((card) => ({
+        ...card,
+        isReversed: Math.random() < 0.5
+      }));
       for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -1140,15 +1291,16 @@
     // 고른 카드를 자리에 놓고 뒤집기
     function fillSlot(idx) {
       const card = selectedCards[idx];
+      const dirLabel = card.isReversed ? "역방향" : "정방향";
       const holder = document.querySelectorAll(".card-container")[idx];
-      holder.className = "card-container drop";
-      holder.setAttribute("aria-label", `${POSITIONS[idx].label}: ${card.kr}`);
+      holder.className = "card-container drop" + (card.isReversed ? " reversed" : "");
+      holder.setAttribute("aria-label", `${POSITIONS[idx].label}: ${card.kr} (${dirLabel})`);
       holder.innerHTML = `
         <div class="card-inner">
           <div class="card-face card-back">${getCardBackSVG()}</div>
           <div class="card-face card-front">
-            <div class="card-num">${card.roman}</div>
-            <div class="card-art"><img src="cards/${card.id}.jpg" alt="${card.kr}"></div>
+            <div class="card-num">${card.roman} · ${dirLabel}</div>
+            <div class="card-art"><img src="cards/${card.id}.jpg" alt="${card.kr} (${dirLabel})"></div>
             <div>
               <div class="card-title-kr">${card.kr}</div>
               <div class="card-title-en">${card.en}</div>
@@ -1242,15 +1394,24 @@
         const item = document.createElement("div");
         item.className = "reading-item" +
           (isRevealed ? " revealed" : "") +
+          (isRevealed && card.isReversed ? " is-reversed" : "") +
           (isRevealed && lastFocusedIndex === idx ? " active-focus" : "");
 
         if (isRevealed) {
+          const dirLabel = card.isReversed ? "역방향" : "정방향";
+          const dirClass = card.isReversed ? "reversed" : "upright";
+          const keywords = card.isReversed ? card.reversedKeywords : card.uprightKeywords;
+          const revKeyMap = { past: "revPast", present: "revPresent", future: "revFuture" };
+          const desc = card.isReversed ? card[revKeyMap[pos.key]] : card[pos.key];
+
           item.innerHTML = `
             <div class="reading-badge-row">
               <span class="pos-badge">${pos.label}</span>
-              <span class="reading-card-name">${card.roman}. ${card.kr} (${card.en}) · ${pos.label}</span>
+              <span class="dir-badge ${dirClass}">${dirLabel}</span>
+              <span class="reading-card-name">${card.roman}. ${card.kr} (${card.en})</span>
             </div>
-            <p class="reading-desc">${card[pos.key]}</p>
+            <div class="reading-keywords">✦ 핵심 의미: ${keywords}</div>
+            <p class="reading-desc">${desc}</p>
           `;
         } else {
           item.innerHTML = `
